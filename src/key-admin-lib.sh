@@ -6,19 +6,23 @@
 KEY_LENGTH=4096
 
 
-
 ##
 ## The place where we keep individual workflow data
 ## $workflow/id/... is where the things go.
 ##
-WORKFLOWS_PATH=workflows
 
+
+WORKFLOW="$1"
+
+if [[ -z "$WORKFLOWS_PATH" ]] ; then
+	(>&2 echo "$0: Error. Variable WORKFLOWS_PATH is not set, please amend and retry")
+	exit 1
+fi
 
 if  [[ -z "$1" ]] ; then
     (>&2 echo "$0: usage:  $0 name-of-workflow")
     exit 1
 fi
-
 
 
 ##
@@ -47,16 +51,12 @@ if  [[ -z "$ARTEFACT_ROOT" ]] ; then
     ARTEFACT_ROOT=crypto-artefacts
 fi
 
-
 ACTORS="redotter idemia"
 for  x in $ACTORS ; do
  if [[ ! -d "$ARTEFACT_ROOT/$x" ]] ; then
   mkdir -p "$ARTEFACT_ROOT/$x"
  fi
 done
-
-
-
 
 
 ##
@@ -91,12 +91,6 @@ function stateTransition {
 ##  Initialization
 ##
 
-WORKFLOW="$1"
-
-if [[ -z "$WORKFLOWS_PATH" ]] ; then
-	(>&2 echo "$0: Error. Variable WORKFLOWS_PATH is not set, please amend and retry")
-	exit 1
-fi
 
 WORKFLOW_PATH="${WORKFLOWS_PATH}/${WORKFLOW}"
 WORKFLOW_STATE_PATH="${WORKFLOW_PATH}/state.txt"

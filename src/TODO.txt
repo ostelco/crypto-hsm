@@ -2,6 +2,7 @@
     (keeping the artefacts in a compeltely separate code hierarchy).
 2.  Move the whole thing to the "HSM"
 3.  Think about how to use a pkcs #11 compliant HSM instead of local storage, and if possible
+     (do that by reading and grokking https://www.oasis-open.org/standards#pkcs11-base-v2.40)
     implement things that way.
 4.  Think about porting the whole thing to golang and rapsberry pi, or something equally insular.
 5.  Think about running the pkcs#11 HSM in a public cloud of some soet.

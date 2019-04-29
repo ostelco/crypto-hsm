@@ -7,81 +7,9 @@
 ### certificates
 ###
 
-##
-## Key length. 
-##
-KEY_LENGTH=4096
-
-
-##
-## Check for dependencies
-##
-DEPENDENCIES="keytool openssl gpg md5"
-
-for tool in $DEPENDENCIES ; do
-  if [[ -z "$(which $tool)" ]] ; then
-    (>&2 echo "$0: Error. Could not find dependency $tool")
-    exit 1
-  fi
-done
-
-
-
-##
-## The place where we keep individual workflow data
-## $workflow/id/... is where the things go.
-##
-WORKFLOWS=workflows
-
-
-if  [[ -z "$1" ]] ; then
-    (>&2 echo "$0: usage:  $0 name-of-workflow")
-    exit 1
-fi
-
-
-
-function currentState {
-    echo $(cat "$WORKFLOW_STATE_PATH")
-}
-
-function setState {
-    local nextState=$1
-    echo "$nextState" > "$WORKFLOW_STATE_PATH"    
-}
-
-function stateTransition {
-    local assumedCurrentState=$1
-    local nextState=$2
-    local thisState="(currentState)"
-
-    if [[ "$currentState" == "$assumedCurrentState" ]] ; then
-	(>&2 echo "$0: Error. Illegal state transition, assumed current state = '$assumedCurrentState' but in reality it was '$currentState'")
-	exit 1
-    else
-	setState "$nextState"
-    fi
-}
-
-
-##
-##  Initialization
-##
-
-WORKFLOW="$1"
-WORKFLOW_PATH="${WORKFLOWS}/${WORKFLOW}"
-WORKFLOW_STATE_PATH="${WORKFLOW_PATH}/state.txt"
-ARTEFACT_ROOT="${WORKFLOW_PATH}/crypto-artefacts" 
-
-GPG_RECIPIENT_FILENAME="${WORKFLOW_PATH}/gpg-email-address.txt"
-
-if [[ ! -d "$WORKFLOW_PATH" ]] ; then
-    mkdir -p "$WORKFLOW_PATH"
-    mkdir -p "$ARTEFACT_ROOT"
-    setState "INITIAL"
-fi
 
 . key-admin-lib.sh
+
 
 ##
 ##   Workflow engine based in current state
@@ -90,7 +18,7 @@ fi
 CURRENT_STATE="$(currentState)"
 
 # Misc. names used in the workflow
-	
+
 nickname=$WORKFLOW
 ACTOR="redotter"
 DISTINGUISHED_NAME="redotter.co"
@@ -133,8 +61,8 @@ case "$CURRENT_STATE" in
 	echo "Looking for incoming certificate"
 
 	if [[ !  -f "$INCOMING_CERT_FILE" ]] ; then
-	   (>&2 echo "$0: Error. Could not find incoming PEM file in '$INCOMING_CERT_FILE'")
-	   exit 1
+	    (>&2 echo "$0: Error. Could not find incoming PEM file in '$INCOMING_CERT_FILE'")
+	    exit 1
         fi
 
 	if [[  ! -f "$KEYFILE" ]]  ; then
@@ -152,7 +80,7 @@ case "$CURRENT_STATE" in
 	# XXX Should also generate md5 checksum
 
 	GPG_RESULT_FILE="${P12_RESULT_CERT_FILE}.gpg"
-	if [[ -f  $GPG_RESULT_FILE ]] ; Then
+	if [[ -f  $GPG_RESULT_FILE ]] ; then
 	    (>&2 echo "$0: Error. GPG encrypted P12 file already exists: '$GPG_RESULT_FILE', not generating new.")
 	elif  [[ -f "$GPG_RECIPIENT_FILENAME" ]] ; then
 	    echo "Attempting to gpg encrypt"
@@ -177,9 +105,9 @@ case "$CURRENT_STATE" in
 	   # XXX  Set the state to be DONE
 	
 	;; 
-	
+    
     *)    echo "Unknown state '$STATE'"
-	  (>&2 echo "$0: Error. Could not find dependency $tool")
-	  exit 1      
+	(>&2 echo "$0: Error. Could not find dependency $tool")
+	exit 1      
 esac
 

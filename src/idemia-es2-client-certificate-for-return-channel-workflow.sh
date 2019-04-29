@@ -7,94 +7,11 @@
 ### certificates
 ###
 
-##
-## Key length.
-##
-KEY_LENGTH=4096
-
-
-##
-## Check for dependencies
-##
-DEPENDENCIES="openssl tar"
-
-for tool in $DEPENDENCIES ; do
-  if [[ -z "$(which $tool)" ]] ; then
-    (>&2 echo "$0:$LINENO Error. Could not find dependency $tool")
-    exit 1
-  fi
-done
-
-
-
-##
-## The place where we keep individual workflow data
-## $workflow/id/... is where the things go.
-##
-WORKFLOWS=workflows
-
-
-if  [[ -z "$1" ]] ; then
-    (>&2 echo "$0:$LINENO usage:  $0 name-of-workflow")
-    exit 1
-fi
-
-
-
-function currentState {
-    local this_state=$(cat "$WORKFLOW_STATE_PATH")
-    if [[ -z "$this_state" ]] ; then
-	setState "INITIAL"
-	echo "INITIAL"
-    else
-	echo "$this_state"
-    fi
-}
-
-function setState {
-    local nextState=$1
-    echo "$nextState" > "$WORKFLOW_STATE_PATH"
-}
-
-function stateTransition {
-    local assumedCurrentState=$1
-    local nextState=$2
-    local thisState="(currentState)"
-
-    if [[ "$currentState" == "$assumedCurrentState" ]] ; then
-	(>&2 echo "$0:$LINENO Error. Illegal state transition, assumed current state = '$assumedCurrentState' but in reality it was '$currentState'")
-	exit 1
-    else
-	setState "$nextState"
-    fi
-}
-
-
-##
-##  Initialization
-##
-
-WORKFLOW="$1"
-WORKFLOW_PATH="${WORKFLOWS}/${WORKFLOW}"
-WORKFLOW_STATE_PATH="${WORKFLOW_PATH}/state.txt"
-ARTEFACT_ROOT="${WORKFLOW_PATH}/crypto-artefacts"
-
-if [[ ! -d "$WORKFLOW_PATH" ]] ; then
-    mkdir -p "$WORKFLOW_PATH"
-    mkdir -p "$ARTEFACT_ROOT"
-    setState "INITIAL"
-fi
-
-
-## Load library doing almost all the work.
-. ../loltel-csr-roundtrip-for-web-access/key-admin-lib.sh
-
+. key-admin-lib.sh
 
 ##
 ##   Workflow engine based in current state
 ##
-
-
 
 # Misc. names used in the workflow
 
@@ -110,7 +27,6 @@ INCOMING_CERT_FILE="${ARTEFACT_ROOT}/idemia/com.idemia.RedOtter.staging.${WORKFL
 KEYFILE=$(key_filename "redotter" "browser_client_cert_$nickname")
 P12_RESULT_CERT_FILE=$(p12_filename "redotter" "browser_client_cert_$nickname")
 ROLE="${WORKFLOW}_csr_countersigning_ca"
-
 
 #  XXX Shortcutting logic a bit here, should look in directry etc.
 CSR_FILE=$(generate_filename "idemia" 	"com.idemia.10041.notification.2.red-otter" "csr.pem")

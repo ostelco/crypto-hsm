@@ -1,3 +1,39 @@
+#!/bin/bash
+
+##
+## Key length. 
+##
+KEY_LENGTH=4096
+
+
+
+##
+## The place where we keep individual workflow data
+## $workflow/id/... is where the things go.
+##
+WORKFLOWS_PATH=workflows
+
+
+if  [[ -z "$1" ]] ; then
+    (>&2 echo "$0: usage:  $0 name-of-workflow")
+    exit 1
+fi
+
+
+
+##
+## Check for dependencies
+##
+DEPENDENCIES="keytool openssl gpg md5 tar"
+
+for tool in $DEPENDENCIES ; do
+  if [[ -z "$(which $tool)" ]] ; then
+    (>&2 echo "$0:$LINENO Error. Could not find dependency $tool")
+    exit 1
+  fi
+done
+
+
 ##
 ## Setting up directories for the various
 ## roles, deleting old files. Each of the actors
@@ -12,13 +48,67 @@ if  [[ -z "$ARTEFACT_ROOT" ]] ; then
 fi
 
 
-
 ACTORS="redotter idemia"
 for  x in $ACTORS ; do
  if [[ ! -d "$ARTEFACT_ROOT/$x" ]] ; then
   mkdir -p "$ARTEFACT_ROOT/$x"
  fi
 done
+
+
+
+
+
+##
+## State management
+##
+
+function currentState {
+    echo $(cat "$WORKFLOW_STATE_PATH")
+}
+
+function setState {
+    local nextState=$1
+    echo "$nextState" > "$WORKFLOW_STATE_PATH"    
+}
+
+function stateTransition {
+    local assumedCurrentState=$1
+    local nextState=$2
+    local thisState="(currentState)"
+
+    if [[ "$currentState" == "$assumedCurrentState" ]] ; then
+	(>&2 echo "$0: Error. Illegal state transition, assumed current state = '$assumedCurrentState' but in reality it was '$currentState'")
+	exit 1
+    else
+	setState "$nextState"
+    fi
+}
+
+
+
+##
+##  Initialization
+##
+
+WORKFLOW="$1"
+
+if [[ -z "$WORKFLOWS_PATH" ]] ; then
+	(>&2 echo "$0: Error. Variable WORKFLOWS_PATH is not set, please amend and retry")
+	exit 1
+fi
+
+WORKFLOW_PATH="${WORKFLOWS_PATH}/${WORKFLOW}"
+WORKFLOW_STATE_PATH="${WORKFLOW_PATH}/state.txt"
+ARTEFACT_ROOT="${WORKFLOW_PATH}/crypto-artefacts" 
+
+GPG_RECIPIENT_FILENAME="${WORKFLOW_PATH}/gpg-email-address.txt"
+
+if [[ ! -d "$WORKFLOW_PATH" ]] ; then
+    mkdir -p "$WORKFLOW_PATH"
+    mkdir -p "$ARTEFACT_ROOT"
+    setState "INITIAL"
+fi
 
 
 VALIDITY_PERIOD_IN_DAYS="+720"

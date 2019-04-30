@@ -56,10 +56,9 @@ function runStateMachine() {
 		exit 1
 	    fi
 
-	# Generate a self-signed certificate that can be used for
-	# signing purposes.
+	    # Generate a self-signed certificate that can be used for
+	    # signing purposes.
 
-            echo "at #2"
             CRT_FILENAME=$(crt_filename "$ACTOR" "$ROLE")
 	    echo " actor ->$ACTOR,   role->$ROLE"
 	    if [[ -z "$CRT_FILENAME" ]] ; then
@@ -67,7 +66,6 @@ function runStateMachine() {
 		exit 1
 	    fi
 	    if [[ ! -f "$CRT_FILENAME" ]] ; then
-		echo "at #2.1"		
 		self_signed_cert "$ACTOR" "$ROLE" "$DISTINGUISHED_NAME" "$COUNTRY" "$STATE" "$LOCATION" "$ORGANIZATION" "$COMMON_NAME"
 		if [[ ! -f "$CRT_FILENAME" ]] ; then
 		    echo "---> Didn't generate countersigning cert '$CRT_FILENAME'"
@@ -75,27 +73,24 @@ function runStateMachine() {
 		fi
 	    fi
 
-	    echo "at #3"
-	# Now do the actual countersigning
-	#   ... but XXX Hardcoding names etc. isn't something we like.
+	    # Now do the actual countersigning
+	    #   ... but XXX Hardcoding names etc. isn't something we like.
 
 	    RESULT_CRT="${ARTEFACT_ROOT}/idemia/com.idemia.10041.notification.2.red-otter.crt"
 	    SIGNING_CRT="${ARTEFACT_ROOT}/redotter/${ROLE}.crt"
 	    CERTIFICATE_CHAIN_DOC="${ARTEFACT_ROOT}/redotter/${ROLE}_chain.crt"
 	    
 	    if [[ ! -f "$RESULT_CRT" ]] ; then
-		echo "at #3.1"		
 		sign_csr "idemia" "com.idemia.10041.notification.2.red-otter" "$ACTOR" "$ROLE"
 	    fi
 
-	# Generate the file to put in the local server, to allow the certificate when it's used to
-	# gain access
+	    # Generate the file to put in the local server, to allow the certificate when it's used to
+	    # gain access
 
-	# XXX This is ad-hoc, should not be
+	    # XXX This is ad-hoc, should not be
 
 
 
-	    echo "at #4"
 	    if [[ ! -f "$CERTIFICATE_CHAIN_DOC" ]] ; then
 		if [[ ! -f "$SIGNING_CRT" ]] ; then
 		    (>&2 echo "$0:$LINENO Error. Could not find signing crt '$SIGNING_CRT'")
@@ -107,7 +102,7 @@ function runStateMachine() {
 		fi
 	    fi
 
-	# XXX Package the countersigned certificate and the authority certificateso that it can be sent back to the issuer to be used
+	    # XXX Package the countersigned certificate and the authority certificateso that it can be sent back to the issuer to be used
 	    #     in their client.
 
 	    RESULT_PACKAGE="${ARTEFACT_ROOT}/idemia/result-bundle.tgz"
@@ -127,8 +122,8 @@ function runStateMachine() {
 	    ;;
 
 	*)    echo "Unknown state '$CURRENT_STATE'"
-	    (>&2 echo "$0:$LINENO Error. Could not find dependency $tool")
-	    exit 1
+	      (>&2 echo "$0:$LINENO Error. Could not find dependency $tool")
+	      exit 1
     esac
 }
 

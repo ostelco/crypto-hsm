@@ -40,9 +40,6 @@ function runStateMachine() {
 	    ;;
 
 	WAITING_FOR_CSR)
-
-	    echo "at #0"
-
 	    if [[ -z "$ACTOR" ]] ; then
 		(>&2 echo "$0:$LINENO Error.  ACTOR is null")
 		exit 1
@@ -53,10 +50,9 @@ function runStateMachine() {
 		exit 1
 	    fi
 
-	    echo "at #1"
-	# If there is no CSR to sign, then do nothing
+	    # If there is no CSR to sign, then do nothing.
 	    if [[ ! -f "$CSR_FILE" ]] ; then
-		(>&2 echo "$0:$LINENO Error. Could not find dependency $tool")
+		(>&2 echo "$0:$LINENO Error. Could not CSR to sign in '$CSR_FILE'")
 		exit 1
 	    fi
 

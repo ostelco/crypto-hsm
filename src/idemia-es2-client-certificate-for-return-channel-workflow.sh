@@ -90,7 +90,6 @@ function runStateMachine() {
 	    # XXX This is ad-hoc, should not be
 
 
-
 	    if [[ ! -f "$CERTIFICATE_CHAIN_DOC" ]] ; then
 		if [[ ! -f "$SIGNING_CRT" ]] ; then
 		    (>&2 echo "$0:$LINENO Error. Could not find signing crt '$SIGNING_CRT'")

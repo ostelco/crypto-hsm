@@ -106,6 +106,7 @@ if [[ ! -d "$WORKFLOW_PATH" ]] ; then
 fi
 
 if [[ ! -f "$WORKFLOW_STATE_PATH" ]] ; then
+    echo "INFO $0: For some reason the state was unknown, resetting to INITIAL"
     setState "INITIAL"    
 fi
 
@@ -423,3 +424,8 @@ function populate_keystore {
 }
 
 
+##
+## Convenience constants
+##
+
+EMAIL_ADDRESS_REGEXP="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"

@@ -87,9 +87,7 @@ case "$CURRENT_STATE" in
 	elif  [[ -f "$GPG_RECIPIENT_FILENAME" ]] ; then
 	    echo "Attempting to gpg encrypt"
 	    GPG_RECIPIENT_EMAIL=$(cat "$GPG_RECIPIENT_FILENAME")
-	    regex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
-
-	    if [[ "$GPG_RECIPIENT_EMAIL" =~ $regex ]] ; then
+	    if [[ "$GPG_RECIPIENT_EMAIL" =~ $EMAIL_ADDRESS_REGEXP ]] ; then
 		gpg --encrypt --recipient "$GPG_RECIPIENT_EMAIL" "$P12_RESULT_CERT_FILE"
 	    else
 		(>&2 echo "$0: Error. Not a valid email address for use with GPG encryption: '$GPG_RECIPIENT_EMAIL'")

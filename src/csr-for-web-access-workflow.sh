@@ -1,15 +1,12 @@
 #!/bin/bash
 
-
 ###
 ### Workflow for generating and following up CSRs for
 ### web access to Idemias web server, using client
 ### certificates
 ###
 
-
 . key-admin-lib.sh
-
 
 ##
 ##   Workflow engine based in current state
@@ -106,7 +103,7 @@ case "$CURRENT_STATE" in
 	
 	;; 
     
-    *)    echo "Unknown state '$STATE'"
+    *)    echo "Unknown state '$CURRENT_STATE'"
 	(>&2 echo "$0: Error. Could not find dependency $tool")
 	exit 1      
 esac

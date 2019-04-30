@@ -48,7 +48,7 @@ done
 
 
 if  [[ -z "$ARTEFACT_ROOT" ]] ; then
-    ARTEFACT_ROOT=crypto-artefacts
+    ARTEFACT_ROOT="${WORKFLOWS_PATH}/${WORKFLOW}/crypto-artefacts"
 fi
 
 ACTORS="redotter idemia"
@@ -57,6 +57,7 @@ for  x in $ACTORS ; do
   mkdir -p "$ARTEFACT_ROOT/$x"
  fi
 done
+
 
 
 ##
@@ -195,7 +196,6 @@ function generate_cert_config {
     local organization=$7
     local common_name=$8
 
-
     echo "local cert_config=$1"
     echo "local keyfile=$2"
     echo "local distinguished_name=$3"
@@ -205,10 +205,9 @@ function generate_cert_config {
     echo "local organization=$7"
     echo "local common_name=$8"
 
-
     cat > $cert_config <<EOF
 # The main section is named req because the command we are using is req
-# (openssl req ...)
+# (openssl req...)
 [ req ]
 # This specifies the default key size in bits. If not specified then 512 is
 # used. It is used if the -new option is used. It can be overridden by using
@@ -276,6 +275,7 @@ EOF
 ## and SK certs (a.k.a. "self_signed_cert")
 ##
 
+SELF_SIGNED_CERT_PASSWORD="eplekake"
 
 function self_signed_cert {
     local actor=$1
@@ -296,6 +296,7 @@ function self_signed_cert {
     else
       generate_cert_config "$cert_config" "$keyfile" "$distinguished_name" "$country" "$state" "$location" "$organization" "$common_name"
       openssl req \
+	      -passout pass:"$SELF_SIGNED_CERT_PASSWORD" \
 	      -config $cert_config \
 	      -new -x509 -days $VALIDITY_PERIOD_IN_DAYS  -sha256  \
 	      -keyout $keyfile \

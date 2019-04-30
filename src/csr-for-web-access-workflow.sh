@@ -38,6 +38,8 @@ WEB_CERT_NAME="${WORKFLOW}-redotter-key"
 ##
 
 
+CURRENT_STATE="$(currentState)"
+
 case "$CURRENT_STATE" in
 
     INITIAL)
@@ -48,7 +50,10 @@ case "$CURRENT_STATE" in
 	echo "Generating generating csr & key ..."
 	# br -> self_signed_browser_certificate
 	# browser_client_cert_$nickname -> self signed browser certificate for person
-	generate_csr "$ACTOR"   "browser_client_cert_$nickname" "$DISTINGUISHED_NAME" "$COUNTRY" "$STATE" "$LOCATION" "$ORGANIZATION" "$COMMON_NAME"      
+	generate_csr \
+	    "$ACTOR"   "browser_client_cert_$nickname" \
+  	    "$DISTINGUISHED_NAME" "$COUNTRY" "$STATE"  \
+	    "$LOCATION" "$ORGANIZATION" "$COMMON_NAME"
 	
 	echo "... done"
 	stateTransition "INITIAL" "CSR_READY"

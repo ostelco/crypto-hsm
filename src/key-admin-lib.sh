@@ -105,6 +105,11 @@ if [[ ! -d "$WORKFLOW_PATH" ]] ; then
     setState "INITIAL"
 fi
 
+if [[ ! -f "$WORKFLOW_STATE_PATH" ]] ; then
+    setState "INITIAL"    
+fi
+
+
 
 VALIDITY_PERIOD_IN_DAYS="+720"
 

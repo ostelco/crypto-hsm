@@ -14,6 +14,11 @@ KEY_LENGTH=4096
 
 WORKFLOW="$1"
 
+if  [[ -z "$WORKFLOW_TYPE"  ]]; then
+    WORKFLOW_TYPE="generic-certificate-generation"
+fi
+
+
 if [[ -z "$WORKFLOWS_PATH" ]] ; then 
     if  [[ ! -z "$WORKFLOWS_HOME"  ]]  &&   [[ ! -z "$WORKFLOW_TYPE"  ]] ; then
 	WORKFLOWS_PATH="$WORKFLOWS_HOME/$WORKFLOW_TYPE"

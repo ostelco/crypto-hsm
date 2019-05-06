@@ -15,7 +15,7 @@ KEY_LENGTH=4096
 WORKFLOW="$1"
 
 if [[ -z "$WORKFLOWS_PATH" ]] ; then 
-    if  [[ ! -z "$WORKFLOWS_HOME" -a ! -z "$WORKFLOW_TYPE" ]]
+    if  [[ ! -z "$WORKFLOWS_HOME"  ]]  &&   [[ ! -z "$WORKFLOW_TYPE"  ]] ; then
 	WORKFLOW_PATH="$WORKFLOWS_HOME/$WORKFLOW_TYPE" 
     else
 	(>&2 echo "$0: Error. Variable WORKFLOWS_PATH is not set, please amend and retry")
@@ -32,7 +32,16 @@ fi
 ##
 ## Check for dependencies
 ##
-DEPENDENCIES="keytool openssl gpg md5 tar"
+
+UNAME_VALUE=$(uname -a)
+if [[ ! -z $(echo "$UNAME_VALUE" | grep "Ubuntu" ) ]] ; then
+    MD5=md5sum
+else
+    MD5=md5
+fi
+    
+
+DEPENDENCIES="keytool openssl gpg $MD5 tar"
 
 for tool in $DEPENDENCIES ; do
   if [[ -z "$(which $tool)" ]] ; then

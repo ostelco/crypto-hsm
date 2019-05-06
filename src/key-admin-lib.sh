@@ -41,7 +41,7 @@ else
 fi
     
 
-DEPENDENCIES="keytool openssl gpg $MD5 tar"
+DEPENDENCIES="keytool openssl gpg tar $MD5"
 
 for tool in $DEPENDENCIES ; do
   if [[ -z "$(which $tool)" ]] ; then
@@ -122,6 +122,11 @@ if [[ ! -f "$WORKFLOW_STATE_PATH" ]] ; then
     setState "INITIAL"    
 fi
 
+
+if [[ ! -f "$WORKFLOW_STATE_PATH" ]] ; then
+    (>&2 echo "Unable to initialize workflow state path '$WORKFLOW_STATE_PATH'")
+    exit 1
+fi
 
 
 VALIDITY_PERIOD_IN_DAYS="+720"

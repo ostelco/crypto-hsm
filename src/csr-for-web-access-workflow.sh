@@ -79,7 +79,7 @@ case "$CURRENT_STATE" in
 	    (>&2 echo "$0: Error. P12 file already exists: '$P12_RESULT_CERT_FILE', not generating new.")
 	else 
 	    openssl pkcs12 -export  -password  "pass:${PASSWORD}" -in  "$INCOMING_CERT_FILE" -inkey "$KEYFILE" -name "$WEB_CERT_NAME" -out "$P12_RESULT_CERT_FILE"
-	    md5 "$P12_RESULT_CERT_FILE" > "${P12_RESULT_CERT_FILE}.md5"
+	    $MD5 "$P12_RESULT_CERT_FILE" > "${P12_RESULT_CERT_FILE}.md5"
 	fi
 
 	# XXX Should also generate md5 checksum

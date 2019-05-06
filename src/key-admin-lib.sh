@@ -16,7 +16,10 @@ WORKFLOW="$1"
 
 if [[ -z "$WORKFLOWS_PATH" ]] ; then 
     if  [[ ! -z "$WORKFLOWS_HOME"  ]]  &&   [[ ! -z "$WORKFLOW_TYPE"  ]] ; then
-	WORKFLOW_PATH="$WORKFLOWS_HOME/$WORKFLOW_TYPE" 
+	WORKFLOWS_PATH="$WORKFLOWS_HOME/$WORKFLOW_TYPE"
+	if [[ ! -d "$WORKFLOWS_PATH" ]] ; then
+	    mkdir -p "$WORKFLOWS_PATH"
+	fi
     else
 	(>&2 echo "$0: Error. Variable WORKFLOWS_PATH is not set, please amend and retry")
 	exit 1

@@ -6,7 +6,10 @@
 ### certificates
 ###
 
-. key-admin-lib.sh
+WORKFLOW_TYPE=csr-for-web-access
+
+SCRIPT_DIR=$(dirname $0)
+. $SCRIPT_DIR/key-admin-lib.sh
 
 ##
 ##   Workflow engine based in current state

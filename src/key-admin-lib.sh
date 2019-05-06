@@ -14,9 +14,13 @@ KEY_LENGTH=4096
 
 WORKFLOW="$1"
 
-if [[ -z "$WORKFLOWS_PATH" ]] ; then
+if [[ -z "$WORKFLOWS_PATH" ]] ; then 
+    if  [[ ! -z "$WORKFLOWS_HOME" -a ! -z "$WORKFLOW_TYPE" ]]
+	WORKFLOW_PATH="$WORKFLOWS_HOME/$WORKFLOW_TYPE" 
+    else
 	(>&2 echo "$0: Error. Variable WORKFLOWS_PATH is not set, please amend and retry")
 	exit 1
+    fi
 fi
 
 if  [[ -z "$1" ]] ; then
@@ -32,7 +36,7 @@ DEPENDENCIES="keytool openssl gpg md5 tar"
 
 for tool in $DEPENDENCIES ; do
   if [[ -z "$(which $tool)" ]] ; then
-    (>&2 echo "$0:$LINENO Error. Could not find dependency $tool")
+    (>&2 echo "$0:$LINENO Error. Could not find dependency '$tool'")
     exit 1
   fi
 done

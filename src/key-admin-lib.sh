@@ -357,15 +357,13 @@ function generate_csr {
 	echo "WARN: CSR file file $crt_file already exists, not generating again"
     else
 	generate_cert_config "$cert_config" "$keyfile" "$distinguished_name" "$country" "$state" "$location" "$organization" "$common_name"
-	openssl req -new  -days $VALIDITY_PERIOD_IN_DAYS -out "$csr_file" -config "$cert_config"
+	openssl req -new  -days $VALIDITY_PERIOD_IN_DAYS -out "${csr_file}" -config "${cert_config}"
     fi
 }
-
 
 ##
 ## Then sign the various CSRs
 ##
-
 function sign_csr {
     local issuer_actor=$1
     local issuer_role=$2

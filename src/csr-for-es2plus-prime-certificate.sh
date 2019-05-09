@@ -6,7 +6,7 @@
 ### certificates
 ###
 
-WORKFLOW_TYPE=web-access-csr
+WORKFLOW_TYPE=es2plus-prime-csr
 
 SCRIPT_DIR=$(dirname $0)
 . $SCRIPT_DIR/key-admin-lib.sh

@@ -20,7 +20,7 @@ KEYFILE=$(key_filename "redotter" "${WORKFLOW_TYPE}_cert_${nickname}")
 
 P12_RESULT_CERT_FILE=$(p12_filename "redotter" "${WORKFLOW_TYPE}_${nickname}")
 PASSWORD="secret$WORKFLOW"
-WEB_CERT_NAME="${WORKFLOW}-redotter-key"
+WORKFLOW_CERT_NAME="${WORKFLOW}-redotter-key"
 
 INCOMING_CERT_FILES=(${ARTEFACT_ROOT}/idemia/*.pem)
 INCOMING_CERT_FILE=${INCOMING_CERT_FILES[0]}
@@ -63,12 +63,12 @@ case "$CURRENT_STATE" in
 	echo "Looking for incoming certificate ..."
 
 	if [[ ! -z "$INCOMING_CERT_FILE" ]] &&  [[ !  -f "$INCOMING_CERT_FILE" ]] ; then
-	    (>&2 echo "$0: Error. Could not find incoming PEM file in '$INCOMING_CERT_FILE'")
+	    (>&2 echo "$0: Error. Could not find incoming cert file file in '$INCOMING_CERT_FILE'")
 	    exit 1
         fi
 
 	echo " ... found certificate $INCOMING_CERT_FILE"
-
+	
 	echo "Looking for keyfile ..."	
 	if [[  ! -f "$KEYFILE" ]]  ; then
 	    (>&2 echo "$0: Error. Could not find key file $KEYFILE")
@@ -81,7 +81,13 @@ case "$CURRENT_STATE" in
 	    (>&2 echo "$0: Error. P12 file already exists: '$P12_RESULT_CERT_FILE', not generating new.")
 	else
 	    echo "Generating pkcs12 file to use when contacting external service"
-	    openssl pkcs12 -export  -password  "pass:${PASSWORD}" -in  "$INCOMING_CERT_FILE" -inkey "$KEYFILE" -name "$WEB_CERT_NAME" -out "$P12_RESULT_CERT_FILE"
+	    openssl pkcs12 \
+		    -export \
+		    -password  "pass:${PASSWORD}" \
+		    -in  "$INCOMING_CERT_FILE" \
+		    -inkey "$KEYFILE" \
+		    -name "$WORKFLOW_CERT_NAME" \
+		    -out "$P12_RESULT_CERT_FILE"
 	    if [[ $? -eq 1 ]] ; then 
 		(>&2 echo "$0: Error. Could not generate pkcs12 file")
 		exit 1

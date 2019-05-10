@@ -28,8 +28,7 @@ KEYFILE=$(key_filename "redotter" "browser_client_cert_$nickname")
 P12_RESULT_CERT_FILE=$(p12_filename "redotter" "browser_client_cert_$nickname")
 ROLE="${WORKFLOW}_csr_countersigning_ca"
 
-#  XXX Shortcutting logic a bit here, should look in directry etc.
-CSR_FILE=$(generate_filename "idemia" 	"com.idemia.10041.notification.2.red-otter" "csr.pem")
+
 
 
 function runStateMachine() {
@@ -50,9 +49,18 @@ function runStateMachine() {
 		exit 1
 	    fi
 
+	    INCOMING_CSR_PATTERN="${ARTEFACT_ROOT}/idemia/*.csr.pem"
+	    INCOMING_CSR_FILES=($INCOMING_CSR_PATTERN)
+	    INCOMING_CSR_FILE=${INCOMING_CERT_FILES[0]}
+
+	    if [[ -z "$INCOMING_CSR_FILE" ]] ; then
+		(>&2 echo "$0:$LINENO Error. Could not find  CSR to sign when searching for pattern '$INCOMING_CSR_PATTERN'")
+		exit 1
+	    fi
+
 	    # If there is no CSR to sign, then do nothing.
 	    if [[ ! -f "$CSR_FILE" ]] ; then
-		(>&2 echo "$0:$LINENO Error. Could not CSR to sign in '$CSR_FILE'")
+		(>&2 echo "$0:$LINENO Error. Could not find  CSR to sign in '$CSR_FILE'")
 		exit 1
 	    fi
 

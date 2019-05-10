@@ -15,6 +15,7 @@ KEY_LENGTH=4096
 WORKFLOW="$1"
 
 if  [[ -z "$WORKFLOW_TYPE"  ]]; then
+    (>&2 echo "$0: Error. Variable WORKFLOWS_TYPE is not set, defaulting to 'generic-certificate-generation'")
     WORKFLOW_TYPE="generic-certificate-generation"
 fi
 
@@ -380,7 +381,7 @@ function sign_csr {
 	if [[ -r "${csr_file}.pem" ]] ; then
 	   csr_file="${csr_file}.pem"
 	else
-	    (>&2 echo "key-admin-lib:$LINENO: Error. Could not find issuer csr  $csr_file")
+	    (>&2 echo "key-admin-lib:$LINENO: Error. Could not find issuer csr  $csr_file (or ${csr_file}.pem)")
 	    exit 1
 	fi
     fi

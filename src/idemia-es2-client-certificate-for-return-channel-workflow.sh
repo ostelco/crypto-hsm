@@ -7,6 +7,8 @@
 ### certificates
 ###
 
+WORKFLOW_TYPE=idemia-es2-return-channel
+
 . key-admin-lib.sh
 
 ##
@@ -14,6 +16,8 @@
 ##
 
 # Misc. names used in the workflow
+
+
 
 nickname=$WORKFLOW
 ACTOR="redotter"
@@ -27,8 +31,6 @@ INCOMING_CERT_FILE="${ARTEFACT_ROOT}/idemia/com.idemia.RedOtter.staging.${WORKFL
 KEYFILE=$(key_filename "redotter" "browser_client_cert_$nickname")
 P12_RESULT_CERT_FILE=$(p12_filename "redotter" "browser_client_cert_$nickname")
 ROLE="${WORKFLOW}_csr_countersigning_ca"
-
-
 
 
 function runStateMachine() {
@@ -50,13 +52,15 @@ function runStateMachine() {
 	    fi
 
 	    INCOMING_CSR_PATTERN="${ARTEFACT_ROOT}/idemia/*.csr.pem"
-	    INCOMING_CSR_FILES=($INCOMING_CSR_PATTERN)
-	    INCOMING_CSR_FILE=${INCOMING_CERT_FILES[0]}
+	    INCOMING_CSR_FILES=( $INCOMING_CSR_PATTERN)
+	    INCOMING_CSR_FILE=${INCOMING_CSR_FILES[0]}
 
 	    if [[ -z "$INCOMING_CSR_FILE" ]] ; then
 		(>&2 echo "$0:$LINENO Error. Could not find  CSR to sign when searching for pattern '$INCOMING_CSR_PATTERN'")
 		exit 1
 	    fi
+
+	    CSR_FILE="$INCOMING_CSR_FILE"
 
 	    # If there is no CSR to sign, then do nothing.
 	    if [[ ! -f "$CSR_FILE" ]] ; then
@@ -82,14 +86,15 @@ function runStateMachine() {
 	    fi
 
 	    # Now do the actual countersigning
-	    #   ... but XXX Hardcoding names etc. isn't something we like.
 
-	    RESULT_CRT="${ARTEFACT_ROOT}/idemia/com.idemia.10041.notification.2.red-otter.crt"
+	    ISSUER_ROLE=$(basename $INCOMING_CSR_FILE .csr.pem)
+	    RESULT_CRT="${ARTEFACT_ROOT}/idemia/${ISSUER_ROLE}.crt"
 	    SIGNING_CRT="${ARTEFACT_ROOT}/redotter/${ROLE}.crt"
 	    CERTIFICATE_CHAIN_DOC="${ARTEFACT_ROOT}/redotter/${ROLE}_chain.crt"
+
 	    
 	    if [[ ! -f "$RESULT_CRT" ]] ; then
-		sign_csr "idemia" "com.idemia.10041.notification.2.red-otter" "$ACTOR" "$ROLE"
+		sign_csr "idemia" "${ISSUER_ROLE}" "$ACTOR" "$ROLE"
 	    fi
 
 	    # Generate the file to put in the local server, to allow the certificate when it's used to

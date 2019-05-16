@@ -52,13 +52,13 @@ fi
 # Are we in the right cluster?
 if [[ -z $(kubectl config view -o jsonpath='{.contexts[?(@.name == "$DEPLOYMENT_CLUSTER_NAME")].name}') ]] ; then
    echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
-   echo 1
+   exit 1
 fi
 
 kubectl config use-context "$DEPLOYMENT_CLUSTER_NAME"
 if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
    echo "Could not connect to target cluster $DEPLOYMENT_CLUSTER_NAME"
-   echo 1
+   exit 1
 fi
 
 

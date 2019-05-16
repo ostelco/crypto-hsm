@@ -63,7 +63,7 @@ fi
 
 
 # Then do the kubernetes thing
-kubectl create secret generic $KUBERNETES_SECRET_STORE \
+kubectl create secret generic ${KUBERNETES_SECRET_STORE} \
          --from-literal dbUser=${DB_USER} \
          --from-literal dbPassword=${DB_PASSWORD} \
          --from-literal dbUrl=${DB_URL} \

@@ -1,86 +1,45 @@
 #!/bin/bash
 
-SCRIPTDIR=$(dirname $0)
-BASEDIR="$SCRIPTDIR/.."
+DEPLOYMENT_NAME="$0"
 
-##
-## Get all the secrets from somewhere
-##
-IDEMIA_ES2_JKS="${BASEDIR}/loltel-es2-idemia-secrets/crypto-artefacts/idemia/idemia-client-cert.jks"
+echo "Preparing deployment named: $DEPLOYMENT_NAME"
 
-
-
-##
-##  Check that we actually have all the secrets
-##
-
-if [[ -z "$WG2_USER" ]] ;
-    (>&2 echo "$0:$LINENO Error.  WG2_USER is empty")
-    exit 1
+if [[ -z "$DEPLOYMENT_SECRETS_HOME]] ; then
+   echo "Error:  SECRETS_DIR not set, cannot progress"
+   exit 1
 fi
 
-
-if [[ -z "$WG2_API_KEY" ]] ;
-    (>&2 echo "$0:$LINENO Error.  WG2_API_KEY is empty")
-    exit 1
+if [[ -z $(which kubectl) ]]; then
+   echo "Error: Kubectl not installed.  Please reinstall before attempting again"
+   exit 1
 fi
 
+DEPLOYMENT_PARAMETER_FILE="${DEPLOYMENT_SECRETS_HOME}/${DEPLOYMENT_NAME}.sh"
 
-if [[ -z "$WG2_ENDPOINT" ]] ;
-    (>&2 echo "$0:$LINENO Error.  WG2_ENDPOINT is empty")
-    exit 1
+if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
+   echo "Could not file deployment parameter file $DEPLOYMENT_PARAMETER_FILE"
+   exit 1
 fi
 
-if [[ -z "$ES2_PLUS_ENDPOINT" ]] ;
-    (>&2 echo "$0:$LINENO Error.  ES2_PLUS_ENDPOINT is empty")
-    exit 1
-fi
+# Source the parameter file
+. $DEPLOYMENT_PARAMETER_FILE
 
 
-if [[ -z "$IDEMIA_ES2_JKS" ]] ;
-    (>&2 echo "$0:$LINENO Error.  IDEMIA_ES2_JKS is empty")
-    exit 1
-fi
+# Do a bunch of sanity checks based on the parameters from the deployment
+# parameter file
 
+   # XXX TBD
 
-if [[ -z "$IDEMIA_ES2_FUNCTION_REQUESTER_IDENTIFIERS" ]] ;
-    (>&2 echo "$0:$LINENO Error.  IDEMIA_ES2_FUNCTION_REQUESTER_IDENTIFIER is empty")
-    exit 1
-fi
-
-
-if [[ -z "$PGSQL_URL" ]] ;
-    (>&2 echo "$0:$LINENO Error.  PGSQL_URLis empty")
-    exit 1
-fi
-
-
-
-if [[ -z "$PGSQL_USER" ]] ;
-    (>&2 echo "$0:$LINENO Error.  PGSQL_USER is empty")
-    exit 1
-fi
-
-if [[ -z "$PGSQL_PW" ]] ;
-    (>&2 echo "$0:$LINENO Error.  PGSQL_PWis empty")
-    exit 1
-fi
-
-
-##
-##  Now that we know we've got all the secrets, go ahead and
-##  use them.
-##
-
-
+# Then do the kubernetes thing
 kubectl create secret generic simmgr-test-secrets \
-         --from-literal dbUser="$PGSQL_USER" \
-         --from-literal dbPassword="$PGSQL_PW" \
-         --from-literal dbUrl="$PGSQL_URL" \
-         --from-literal wg2User="$WG2_USER" \
-         --from-literal wg2ApiKey="$WG_API_KEY" \
-         --from-literal wg2Endpoint="$WG2_ENDPOINT" \
-         --from-literal es2plusEndpoint="$ES2_PLUS_ENDPOINT" \
-         --from-literal functionRequesterIdentifier="$IDEMIA_ES2_FUNCTION_REQUESTER_IDENTIFIERS" \
-         --from-file    idemiaClientCert="${IDEMIA_ES2_JKS}"
+         --from-literal dbUser=${DB_USER} \
+         --from-literal dbPassword=${DB_PASSWORD} \
+         --from-literal dbUrl=${DB_URL} \
+         --from-literal wg2User=${WG2_USER} \
+         --from-literal wg2ApiKey=${WG2_API_KEY} \
+         --from-literal wg2Endpoint=${WG2_ENDPOINT} \
+         --from-literal es2plusEndpoint=${ES2_PLUS_ENDPOINT} \
+         --from-literal functionRequesterIdentifier=${ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER} \
+         --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
 
+echo "Deployment done."

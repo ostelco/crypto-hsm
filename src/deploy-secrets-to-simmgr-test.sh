@@ -23,7 +23,11 @@ fi
 DEPLOYMENT_PARAMETER_FILE="${DEPLOYMENT_SECRETS_HOME}/${DEPLOYMENT_NAME}.sh"
 
 if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
-   echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2
+    echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2
+    echo "Available deployments are:"    >&2
+    for x in $(ls ${DEPLOYMENT_SECRETS_HOME} | xargs -n 1 basename | sed 's/.sh//g' ) ; do
+	echo "   $x"
+    done
    exit 1
 fi
 

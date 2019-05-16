@@ -44,6 +44,11 @@ if [[ -z "$DEPLOYMENT_CLUSTER_NAME" ]] ; then
    exit 1
 fi
 
+if [[ -z "$KUBERNETES_SECRET_STORE" ]] ; then
+   echo "ERROR: KUBERNETES_SECRET_STORE variable not set" >&2
+   exit 1
+fi
+
 # Are we in the right cluster?
 if [[ -z $(kubectl config view -o jsonpath='{.contexts[?(@.name == "$DEPLOYMENT_CLUSTER_NAME")].name}') ]] ; then
    echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
@@ -58,7 +63,7 @@ fi
 
 
 # Then do the kubernetes thing
-kubectl create secret generic simmgr-test-secrets \
+kubectl create secret generic $KUBERNETES_SECRET_STORE \
          --from-literal dbUser=${DB_USER} \
          --from-literal dbPassword=${DB_PASSWORD} \
          --from-literal dbUrl=${DB_URL} \

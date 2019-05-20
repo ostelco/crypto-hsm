@@ -132,7 +132,8 @@ kubectl create secret generic ${KUBERNETES_SECRETS_STORE} \
          --from-literal functionRequesterIdentifier=${ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER} \
          --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
 
-if [[ $? -eq 0 ]] ; then
+
+if [[ $? -ne 0 ]] ; then
    echo "Deployment to kubernetes cluster did not go well. Please  investigate" >&2
    exit 1
 fi

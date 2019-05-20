@@ -50,6 +50,7 @@ fi
 
 
 
+
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
    exit 1    
@@ -66,9 +67,10 @@ if [[ -z "$KUBERNETES_SECRETS_STORE" ]] ; then
 fi
 
 # Are we in the right cluster?
-if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$DEPLOYMENT_CLUSTER_NAME\")].name}") ]] ; then
-   echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
-   exit 1
+
+if [[ -z "$GCLOUD_CLUSTER_NAME" ]] ; then
+    echo "GCLOUD_CLUSTER_NAME is not set".
+    exit 1
 fi
 
 if [[ -z "$GCLOUD_PROJECT_ID" ]] ; then
@@ -95,13 +97,28 @@ gcloud config set compute/region "$GCLOUD_COMPUTE_REGION"
 # Then (obviously) update the gcloud command itself
 gcloud components update
 
+if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; then
+    echo "Couldn't find cluster $GCLOUD_CLUSTER_NAME when looking for it using the gcloud command"
+    exit 1
+fi
 
+# Update the kubernetes credentials
+
+gcloud container clusters get-credentials $GCLOUD_CLUSTER_NAME
+
+# Then check if kubectl can see the expected cluster
+
+if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$DEPLOYMENT_CLUSTER_NAME\")].name}") ]] ; then
+   echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
+   exit 1
+fi
 
 kubectl config use-context "$DEPLOYMENT_CLUSTER_NAME"
 if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
    echo "Could not connect to target cluster $DEPLOYMENT_CLUSTER_NAME"
    exit 1
 fi
+
 
 # Then do the kubernetes thing
 kubectl create secret generic ${KUBERNETES_SECRETS_STORE} \

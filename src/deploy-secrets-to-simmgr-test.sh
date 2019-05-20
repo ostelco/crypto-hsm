@@ -57,7 +57,7 @@ if [[ -z "$KUBERNETES_SECRETS_STORE" ]] ; then
 fi
 
 # Are we in the right cluster?
-if [[ -z $(kubectl config view -o jsonpath='{.contexts[?(@.name == "$DEPLOYMENT_CLUSTER_NAME")].name}') ]] ; then
+if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$DEPLOYMENT_CLUSTER_NAME\")].name}") ]] ; then
    echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
    exit 1
 fi

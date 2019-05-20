@@ -51,8 +51,8 @@ if [[ -z "$DEPLOYMENT_CLUSTER_NAME" ]] ; then
    exit 1
 fi
 
-if [[ -z "$KUBERNETES_SECRET_STORE" ]] ; then
-   echo "ERROR: KUBERNETES_SECRET_STORE variable not set" >&2
+if [[ -z "$KUBERNETES_SECRETS_STORE" ]] ; then
+   echo "ERROR: KUBERNETES_SECRETS_STORE variable not set" >&2
    exit 1
 fi
 
@@ -69,7 +69,7 @@ if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; th
 fi
 
 # Then do the kubernetes thing
-kubectl create secret generic ${KUBERNETES_SECRET_STORE} \
+kubectl create secret generic ${KUBERNETES_SECRETS_STORE} \
          --from-literal dbUser=${DB_USER} \
          --from-literal dbPassword=${DB_PASSWORD} \
          --from-literal dbUrl=${DB_URL} \

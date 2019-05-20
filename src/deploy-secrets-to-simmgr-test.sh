@@ -2,9 +2,18 @@
 
 DEPLOYMENT_NAME="$1"
 
+function list_available_deployments {
+    echo "Available deployments are:"    >&2
+    for x in $(ls ${DEPLOYMENT_SECRETS_HOME} | xargs -n 1 basename | sed 's/.sh//g' | egrep -v '[~#]' ) ; do
+	echo "   $x"
+    done    
+}
+
+
 if [[ "$#" -ne 1 ]] ; then
     echo "Usage:   $0  deployment-name" >&2
     echo "   ... missing deployment-name" >&2
+    list_available_deployments
     exit 1
 fi
 
@@ -22,13 +31,11 @@ fi
 
 DEPLOYMENT_PARAMETER_FILE="${DEPLOYMENT_SECRETS_HOME}/${DEPLOYMENT_NAME}.sh"
 
+
 if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
-    echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2
-    echo "Available deployments are:"    >&2
-    for x in $(ls ${DEPLOYMENT_SECRETS_HOME} | xargs -n 1 basename | sed 's/.sh//g' ) ; do
-	echo "   $x"
-    done
-   exit 1
+    echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2    
+    list_available_deployments
+    exit 1
 fi
 
 # Source the parameter file
@@ -61,7 +68,6 @@ if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; th
    exit 1
 fi
 
-
 # Then do the kubernetes thing
 kubectl create secret generic ${KUBERNETES_SECRET_STORE} \
          --from-literal dbUser=${DB_USER} \
@@ -80,3 +86,4 @@ if [[ $? -eq 0 ]] ; then
 fi
    
 echo "Successul deployment."
+

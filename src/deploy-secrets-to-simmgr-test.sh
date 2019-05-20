@@ -29,6 +29,12 @@ if [[ -z $(which kubectl) ]]; then
    exit 1
 fi
 
+if [[ -z "$(which gcloud)" ]] ; then
+   echo "gcloud not installed, please reinstall before attempting again" >&2
+   exit 1
+fi
+
+
 DEPLOYMENT_PARAMETER_FILE="${DEPLOYMENT_SECRETS_HOME}/${DEPLOYMENT_NAME}.sh"
 
 
@@ -38,8 +44,11 @@ if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
     exit 1
 fi
 
+
 # Source the parameter file
 . $DEPLOYMENT_PARAMETER_FILE
+
+
 
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
@@ -61,6 +70,32 @@ if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$DEPLOYMENT
    echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
    exit 1
 fi
+
+if [[ -z "$GCLOUD_PROJECT_ID" ]] ; then
+   echo "GCLOUD_PROJECT_ID not set." >&2
+   exit 1
+fi
+
+if [[ -z "$GCLOUD_COMPUTE_ZONE" ]] ; then
+   echo "GCLOUD_COMPUTE_ZONE not set." >&2
+   exit 1
+fi
+
+if [[ -z "$GCLOUD_COMPUTE_REGION" ]] ; then
+   echo "GCLOUD_COMPUTE_REGION not set." >&2
+   exit 1
+fi
+
+
+# Configure the cluster so kubernetes can do its job using the gcloud command
+gcloud config set project "$GCLOUD_PROJECT_ID"
+gcloud config set compute/zone "$GCLOUD_COMPUTE_ZONE"
+gcloud config set compute/region "$GCLOUD_COMPUTE_REGION"
+
+# Then (obviously) update the gcloud command itself
+gcloud components update
+
+
 
 kubectl config use-context "$DEPLOYMENT_CLUSTER_NAME"
 if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then

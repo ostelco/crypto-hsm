@@ -117,6 +117,8 @@ function runStateMachine() {
 	    # XXX Package the countersigned certificate and the authority certificateso that it can be sent back to the issuer to be used
 	    #     in their client.
 
+	    ## XXX TODO: FIx this, connect into the direcdtory whre the thing is  stored,
+	    ##           right now the entire path is sent into the tar.
 	    RESULT_PACKAGE="${ARTEFACT_ROOT}/idemia/result-bundle.tgz"
 	    tar czf "$RESULT_PACKAGE"  "$RESULT_CRT" "$SIGNING_CRT" 
 

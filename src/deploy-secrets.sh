@@ -87,6 +87,31 @@ if [[ -z "$GCLOUD_COMPUTE_REGION" ]] ; then
    exit 1
 fi
 
+if [[ -z "$NAMESPACE" ]] ; then
+   echo "NAMESPACE not set." >&2
+   exit 1
+fi
+
+if [[ ! "$NAMESPACE" == "prod"  ]] ; then
+    if [[ ! "$NAMESPACE" == "dev"  ]] ; then
+	echo "NAMESPACE is set to '$NAMESPACE', but only 'prod' and 'dev' are legal values." >&2
+	exit 1
+    fi
+fi
+
+if [[ -z "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" ]]; then
+   echo "CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE not set." >&2
+   exit 1
+fi
+
+if [[ ! -f "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" ]]; then
+   echo "file CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE='${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}' does not exist." >&2
+   exit 1
+fi
+
+# Copy from original to local to ensure correct filename and local path
+TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE=tls.crt
+cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
 # Configure the cluster so kubernetes can do its job using the gcloud command
 gcloud config set project "$GCLOUD_PROJECT_ID"
@@ -100,8 +125,6 @@ if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; th
     echo "Couldn't find cluster $GCLOUD_CLUSTER_NAME when looking for it using the gcloud command"
     exit 1
 fi
-
-# Update the kubernetes credentials
 
 gcloud container clusters get-credentials $GCLOUD_CLUSTER_NAME
 
@@ -119,8 +142,14 @@ if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; th
 fi
 
 
+# XXX Should we first destroy the secret?
+kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
+kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
+
+# XXX Should we set namespace?
 # Then do the kubernetes thing
 kubectl create secret generic ${KUBERNETES_SECRETS_STORE} \
+         --namespace="${NAMESPACE}" \
          --from-literal dbUser=${DB_USER} \
          --from-literal dbPassword=${DB_PASSWORD} \
          --from-literal dbUrl=${DB_URL} \

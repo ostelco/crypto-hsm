@@ -49,6 +49,7 @@ fi
 . $DEPLOYMENT_PARAMETER_FILE
 
 
+# Check that we actually got the parameters we need.
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
    exit 1    

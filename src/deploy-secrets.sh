@@ -142,13 +142,13 @@ if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; th
 fi
 
 
-# XXX Should we first destroy the secret?
+# Delete ehan update the smdp-cacert
 kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
 kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
-# XXX Should we set namespace?
+# Then set the simmgr secrets
 # Then do the kubernetes thing
-kubectl create secret generic ${KUBERNETES_SECRETS_STORE} \
+kubectl create secret generic ${SIM_MANAGER_SECRET} \
          --namespace="${NAMESPACE}" \
          --from-literal dbUser=${DB_USER} \
          --from-literal dbPassword=${DB_PASSWORD} \
@@ -161,10 +161,13 @@ kubectl create secret generic ${KUBERNETES_SECRETS_STORE} \
          --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
 
 
+
 if [[ $? -ne 0 ]] ; then
    echo "Deployment to kubernetes cluster did not go well. Please  investigate" >&2
    exit 1
 fi
+
+rm "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
    
 echo "Successul deployment."
 

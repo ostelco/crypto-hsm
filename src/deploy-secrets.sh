@@ -49,8 +49,6 @@ fi
 . $DEPLOYMENT_PARAMETER_FILE
 
 
-
-
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
    exit 1    

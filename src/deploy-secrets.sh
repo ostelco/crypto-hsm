@@ -55,8 +55,8 @@ if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    exit 1    
 fi
 
-if [[ -z "$DEPLOYMENT_CLUSTER_NAME" ]] ; then
-   echo "ERROR: DEPLOYMENT_CLUSTER_NAME variable not set" >&2
+if [[ -z "$KUBERNETES_CLUSTER_NAME" ]] ; then
+   echo "ERROR: KUBERNETES_CLUSTER_NAME variable not set" >&2
    exit 1
 fi
 
@@ -65,11 +65,35 @@ if [[ -z "$KUBERNETES_SECRETS_STORE" ]] ; then
    exit 1
 fi
 
+
 # Are we in the right cluster?
+
+if [[ -z "$ENV_TYPE" ]] ; then
+	echo "ENV_TYPE is not set.  Please set to  'prod' or 'dev'." >&2
+	exit 1    
+fi
+
+if [[ ! "$ENV_TYPE" == "prod"  ]] ; then
+    if [[ ! "$ENV_TYPE" == "dev"  ]] ; then
+	echo "ENV_TYPE is set to '$ENV_TYPE', but only 'prod' and 'dev' are legal values." >&2
+	exit 1
+    fi
+fi
+
+# Based on knowing if we're in dev or prod, alculate the namespace
+# and gcloud project id.
+
+NAMESPACE="${ENV_TYPE)"
+GCLOUD_PROJECT_ID="pi-ostelco-${ENV_TYPE}"
+
 
 if [[ -z "$GCLOUD_CLUSTER_NAME" ]] ; then
     echo "GCLOUD_CLUSTER_NAME is not set".
-    exit 1
+    if [[ -z "$ENV_TYPE" ]] ; then
+	exit 1
+    else
+	GCLOUD_CLUSTER_NAME="pi-${ENV_TYPE}"
+    fi
 fi
 
 if [[ -z "$GCLOUD_PROJECT_ID" ]] ; then
@@ -90,13 +114,6 @@ fi
 if [[ -z "$NAMESPACE" ]] ; then
    echo "NAMESPACE not set." >&2
    exit 1
-fi
-
-if [[ ! "$NAMESPACE" == "prod"  ]] ; then
-    if [[ ! "$NAMESPACE" == "dev"  ]] ; then
-	echo "NAMESPACE is set to '$NAMESPACE', but only 'prod' and 'dev' are legal values." >&2
-	exit 1
-    fi
 fi
 
 if [[ -z "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" ]]; then
@@ -122,36 +139,41 @@ cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PL
 # Then (obviously) update the gcloud command itself
 gcloud components update
 
-### XXX FIX THIS ( parameterize with prod/dev)
-gcloud container clusters get-credentials pi-dev --region europe-west1 --product pi-ostelco-dev
 
-# Configure the cluster so kubernetes can do its job using the gcloud command
-gcloud config set project "$GCLOUD_PROJECT_ID"
-#gcloud config set compute/zone "$GCLOUD_COMPUTE_ZONE"
-gcloud config set compute/region "$GCLOUD_COMPUTE_REGION"
+# Select which cluster region to work on
+gcloud container clusters \
+      get-credentials "${GCLOUD_CLUSTER_NAME}" \
+      --region europe-west1 \
+      --product "${GCLOUD_PROJECT_ID}"
+## XXXX --project instead of product?
 
 if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; then
     echo "Couldn't find cluster $GCLOUD_CLUSTER_NAME when looking for it using the gcloud command"
     exit 1
 fi
 
+# Get credentials so that kubectl can do its job.
 gcloud container clusters get-credentials $GCLOUD_CLUSTER_NAME
 
 # Then check if kubectl can see the expected cluster
-
-if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$DEPLOYMENT_CLUSTER_NAME\")].name}") ]] ; then
-   echo "Target cluster '$DEPLOYMENT_CLUSTER_NAME' is unknown." >&2
+if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$KUBERNETES_CLUSTER_NAME\")].name}") ]] ; then
+   echo "Target cluster '$KUBERNETES_CLUSTER_NAME' is unknown." >&2
    exit 1
 fi
 
-kubectl config use-context "$DEPLOYMENT_CLUSTER_NAME"
-if [[ "$DEPLOYMENT_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
-   echo "Could not connect to target cluster $DEPLOYMENT_CLUSTER_NAME"
+kubectl config use-context "$KUBERNETES_CLUSTER_NAME"
+if [[ "$KUBERNETES_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
+   echo "Could not connect to target cluster $KUBERNETES_CLUSTER_NAME"
    exit 1
 fi
 
 
-# Delete ehan update the smdp-cacert
+
+##
+## At this point we know enough to execute the kubectl command to update secrets.
+##
+
+# Delete then update the smdp-cacert
 kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
 kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
@@ -171,12 +193,17 @@ kubectl create secret generic ${SIM_MANAGER_SECRET} \
 
 
 
+##
+## Reporting status and cleaning up.
+##
+
 if [[ $? -ne 0 ]] ; then
    echo "Deployment to kubernetes cluster did not go well. Please  investigate" >&2
+   rm "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
    exit 1
+else
+    rm "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 fi
-
-rm "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
    
 echo "Successul deployment."
 

@@ -77,10 +77,10 @@ if [[ -z "$GCLOUD_PROJECT_ID" ]] ; then
    exit 1
 fi
 
-if [[ -z "$GCLOUD_COMPUTE_ZONE" ]] ; then
-   echo "GCLOUD_COMPUTE_ZONE not set." >&2
-   exit 1
-fi
+#if [[ -z "$GCLOUD_COMPUTE_ZONE" ]] ; then
+#   echo "GCLOUD_COMPUTE_ZONE not set." >&2
+#   exit 1
+#fi
 
 if [[ -z "$GCLOUD_COMPUTE_REGION" ]] ; then
    echo "GCLOUD_COMPUTE_REGION not set." >&2
@@ -113,13 +113,22 @@ fi
 TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE=tls.crt
 cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
-# Configure the cluster so kubernetes can do its job using the gcloud command
-gcloud config set project "$GCLOUD_PROJECT_ID"
-gcloud config set compute/zone "$GCLOUD_COMPUTE_ZONE"
-gcloud config set compute/region "$GCLOUD_COMPUTE_REGION"
+
+
+##
+## Setting up access to the cluster (regional, not zonal)
+##
 
 # Then (obviously) update the gcloud command itself
 gcloud components update
+
+### XXX FIX THIS ( parameterize with prod/dev)
+gcloud container clusters get-credentials pi-dev --region europe-west1 --product pi-ostelco-dev
+
+# Configure the cluster so kubernetes can do its job using the gcloud command
+gcloud config set project "$GCLOUD_PROJECT_ID"
+#gcloud config set compute/zone "$GCLOUD_COMPUTE_ZONE"
+gcloud config set compute/region "$GCLOUD_COMPUTE_REGION"
 
 if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; then
     echo "Couldn't find cluster $GCLOUD_CLUSTER_NAME when looking for it using the gcloud command"

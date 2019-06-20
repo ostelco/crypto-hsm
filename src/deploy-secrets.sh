@@ -73,7 +73,6 @@ if [[ ! "$ENV_TYPE" == "prod"  ]] ; then
 fi
 
 
-echo "banana"
 
 # Based on knowing if we're in dev or prod, alculate the namespace
 # and gcloud project id.
@@ -161,20 +160,24 @@ fi
 # Get credentials so that kubectl can do its job.
 gcloud container clusters get-credentials $GCLOUD_CLUSTER_NAME
 
+echo "foo"
 # Then check if kubectl can see the expected cluster
 if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$KUBERNETES_CLUSTER_NAME\")].name}") ]] ; then
    echo "Target cluster '$KUBERNETES_CLUSTER_NAME' is unknown." >&2
    exit 1
 fi
 
+echo "bar"
+
 kubectl config use-context "$KUBERNETES_CLUSTER_NAME"
+echo "baz"
 
 if [[ "$KUBERNETES_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
    echo "Could not connect to target cluster $KUBERNETES_CLUSTER_NAME"
    exit 1
 fi
 
-
+echo "gazonk"
 
 ##
 ## At this point we know enough to execute the kubectl command to update secrets.

@@ -76,7 +76,7 @@ fi
 
 # Based on knowing if we're in dev or prod, alculate the namespace
 # and gcloud project id.
-
+echo "1"
 NAMESPACE="${ENV_TYPE)"
 GCLOUD_PROJECT_ID="pi-ostelco-${ENV_TYPE}"
 
@@ -90,6 +90,7 @@ if [[ -z "$GCLOUD_CLUSTER_NAME" ]] ; then
     fi
 fi
 
+echo "2"
 if [[ -z "$GCLOUD_PROJECT_ID" ]] ; then
    echo "GCLOUD_PROJECT_ID not set." >&2
    exit 1
@@ -105,6 +106,7 @@ if [[ -z "$NAMESPACE" ]] ; then
    exit 1
 fi
 
+echo "3"
 if [[ -z "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" ]]; then
    echo "CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE not set." >&2
    exit 1
@@ -119,7 +121,7 @@ fi
 TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE=tls.crt
 cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
-
+echo "4"
 
 ##
 ## Setting up access to the cluster (regional, not zonal)
@@ -128,6 +130,7 @@ cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PL
 # Then (obviously) update the gcloud command itself
 gcloud components update
 
+echo "5"
 
 # Getting access via authentication
 gcloud container clusters \

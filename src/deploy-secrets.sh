@@ -176,8 +176,8 @@ fi
 ##
 
 # Delete then update the smdp-cacert
-echo kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
-echo kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
+kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
+kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
 # Then set the simmgr secrets
 # Then do the kubernetes thing

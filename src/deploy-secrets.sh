@@ -77,7 +77,7 @@ fi
 # Based on knowing if we're in dev or prod, alculate the namespace
 # and gcloud project id.
 echo "1"
-NAMESPACE="${ENV_TYPE)"
+NAMESPACE="${ENV_TYPE}"
 echo "1.1"
 GCLOUD_PROJECT_ID="pi-ostelco-${ENV_TYPE}"
 echo "1.2"

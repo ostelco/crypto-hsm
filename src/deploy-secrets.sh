@@ -93,11 +93,6 @@ if [[ -z "$GCLOUD_PROJECT_ID" ]] ; then
    exit 1
 fi
 
-#if [[ -z "$GCLOUD_COMPUTE_ZONE" ]] ; then
-#   echo "GCLOUD_COMPUTE_ZONE not set." >&2
-#   exit 1
-#fi
-
 if [[ -z "$GCLOUD_COMPUTE_REGION" ]] ; then
    echo "GCLOUD_COMPUTE_REGION not set." >&2
    exit 1
@@ -135,9 +130,9 @@ gcloud components update
 # Getting access via authentication
 gcloud container clusters \
       get-credentials "${GCLOUD_CLUSTER_NAME}" \
-      --region europe-west1 \
+      --region "${GCLOUD_COMPUTE_REGION}" \
       --product "${GCLOUD_PROJECT_ID}"
-
+## XXXX --project instead of product?
 
 # Then setting which context to us
 gcloud config set project $GCLOUD_PROJECT_ID 
@@ -153,7 +148,7 @@ fi
 
 # Select which cluster region to work on
 
-## XXXX --project instead of product?
+
 
 if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; then
     echo "Couldn't find cluster $GCLOUD_CLUSTER_NAME when looking for it using the gcloud command"
@@ -170,6 +165,7 @@ if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$KUBERNETES
 fi
 
 kubectl config use-context "$KUBERNETES_CLUSTER_NAME"
+
 if [[ "$KUBERNETES_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
    echo "Could not connect to target cluster $KUBERNETES_CLUSTER_NAME"
    exit 1

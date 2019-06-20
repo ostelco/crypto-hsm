@@ -144,7 +144,7 @@ gcloud config set project $GCLOUD_PROJECT_ID
 kubectl config use-context $(kubectl config get-contexts -o name | grep $GCLOUD_PROJECT_ID)
 
 # Fromo the context, find the kubernetes cluster name
-KUBERNETES_CLUSTER_NAME=$(kubectl config get-contexts -o name | grep $GCLOUD_PROJECT_ID | awk '{print $3}')
+KUBERNETES_CLUSTER_NAME=$(kubectl config get-contexts -o name | grep $GCLOUD_PROJECT_ID )
 
 if [[ -z "$KUBERNETES_CLUSTER_NAME" ]] ; then
    echo "Could not determine KUBERNETES_CLUSTER_NAME." >&2

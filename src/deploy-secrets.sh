@@ -179,17 +179,19 @@ kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file
 
 # Then set the simmgr secrets
 # Then do the kubernetes thing
-kubectl create secret generic ${SIM_MANAGER_SECRET} \
-         --namespace="${NAMESPACE}" \
-         --from-literal dbUser=${DB_USER} \
-         --from-literal dbPassword=${DB_PASSWORD} \
-         --from-literal dbUrl=${DB_URL} \
-         --from-literal wg2User=${WG2_USER} \
-         --from-literal wg2ApiKey=${WG2_API_KEY} \
-         --from-literal wg2Endpoint=${WG2_ENDPOINT} \
-         --from-literal es2plusEndpoint=${ES2_PLUS_ENDPOINT} \
-         --from-literal functionRequesterIdentifier=${ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER} \
-         --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
+
+### XXX  Disabling changes to all changes except the smdp-cacert
+# kubectl create secret generic ${SIM_MANAGER_SECRET} \
+#          --namespace="${NAMESPACE}" \
+#          --from-literal dbUser=${DB_USER} \
+#          --from-literal dbPassword=${DB_PASSWORD} \
+#          --from-literal dbUrl=${DB_URL} \
+#          --from-literal wg2User=${WG2_USER} \
+#          --from-literal wg2ApiKey=${WG2_API_KEY} \
+#          --from-literal wg2Endpoint=${WG2_ENDPOINT} \
+#          --from-literal es2plusEndpoint=${ES2_PLUS_ENDPOINT} \
+#          --from-literal functionRequesterIdentifier=${ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER} \
+#          --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
 
 
 

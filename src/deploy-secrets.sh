@@ -72,6 +72,9 @@ if [[ ! "$ENV_TYPE" == "prod"  ]] ; then
     fi
 fi
 
+
+echo "banana"
+
 # Based on knowing if we're in dev or prod, alculate the namespace
 # and gcloud project id.
 

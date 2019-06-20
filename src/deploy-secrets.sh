@@ -176,14 +176,14 @@ fi
 ##
 
 # Delete then update the smdp-cacert
-if [[ -n "$(kubectl describe secrets/smdp-cacert --namespace=${NAMESPACE} | grep NotFound)" ]] ; then 
+if [[ !  -z "$(kubectl describe secrets/smdp-cacert --namespace=${NAMESPACE} | grep NotFound)" ]] ; then 
     kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
 fi 
 
 kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
 # Then do the same for sim manager secrets
-if [[ -n "$(kubectl describe secrets/simmgr-prod-secrets --namespace=${NAMESPACE} | grep NotFound)" ]] ; then 
+if [[ ! -z "$(kubectl describe secrets/simmgr-prod-secrets --namespace=${NAMESPACE} | grep NotFound)" ]] ; then 
     kubectl delete secret simmg-prod-secrets --namespace="${NAMESPACE}"
 fi 
 

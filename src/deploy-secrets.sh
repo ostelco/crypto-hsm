@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 DEPLOYMENT_NAME="$1"
 
 function list_available_deployments {
@@ -53,16 +55,6 @@ fi
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
    exit 1    
-fi
-
-if [[ -z "$KUBERNETES_CLUSTER_NAME" ]] ; then
-   echo "ERROR: KUBERNETES_CLUSTER_NAME variable not set" >&2
-   exit 1
-fi
-
-if [[ -z "$KUBERNETES_SECRETS_STORE" ]] ; then
-   echo "ERROR: KUBERNETES_SECRETS_STORE variable not set" >&2
-   exit 1
 fi
 
 
@@ -140,11 +132,27 @@ cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PL
 gcloud components update
 
 
-# Select which cluster region to work on
+# Getting access via authentication
 gcloud container clusters \
       get-credentials "${GCLOUD_CLUSTER_NAME}" \
       --region europe-west1 \
       --product "${GCLOUD_PROJECT_ID}"
+
+
+# Then setting which context to us
+gcloud config set project $GCLOUD_PROJECT_ID 
+kubectl config use-context $(kubectl config get-contexts -o name | grep $GCLOUD_PROJECT_ID)
+
+# Fromo the context, find the kubernetes cluster name
+KUBERNETES_CLUSTER_NAME=$(kubectl config get-contexts -o name | grep $GCLOUD_PROJECT_ID | awk '{priny $3}')
+
+if [[ -z "$KUBERNETES_CLUSTER_NAME" ]] ; then
+   echo "Could not determine KUBERNETES_CLUSTER_NAME." >&2
+   exit 1    
+fi
+
+# Select which cluster region to work on
+
 ## XXXX --project instead of product?
 
 if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; then

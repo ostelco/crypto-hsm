@@ -78,8 +78,9 @@ fi
 # and gcloud project id.
 echo "1"
 NAMESPACE="${ENV_TYPE)"
+echo "1.1"
 GCLOUD_PROJECT_ID="pi-ostelco-${ENV_TYPE}"
-
+echo "1.2"
 
 if [[ -z "$GCLOUD_CLUSTER_NAME" ]] ; then
     echo "GCLOUD_CLUSTER_NAME is not set".

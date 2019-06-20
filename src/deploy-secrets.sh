@@ -137,8 +137,7 @@ echo "5"
 gcloud container clusters \
       get-credentials "${GCLOUD_CLUSTER_NAME}" \
       --region "${GCLOUD_COMPUTE_REGION}" \
-      --product "${GCLOUD_PROJECT_ID}"
-## XXXX --project instead of product?
+      --project "${GCLOUD_PROJECT_ID}"
 
 # Then setting which context to us
 gcloud config set project $GCLOUD_PROJECT_ID 

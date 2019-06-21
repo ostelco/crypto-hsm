@@ -11,7 +11,6 @@ function list_available_deployments {
     done    
 }
 
-
 if [[ "$#" -ne 1 ]] ; then
     echo "Usage:   $0  deployment-name" >&2
     echo "   ... missing deployment-name" >&2
@@ -36,9 +35,7 @@ if [[ -z "$(which gcloud)" ]] ; then
    exit 1
 fi
 
-
 DEPLOYMENT_PARAMETER_FILE="${DEPLOYMENT_SECRETS_HOME}/${DEPLOYMENT_NAME}.sh"
-
 
 if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
     echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2    
@@ -46,17 +43,14 @@ if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
     exit 1
 fi
 
-
 # Source the parameter file
 . $DEPLOYMENT_PARAMETER_FILE
-
 
 # Check that we actually got the parameters we need.
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
    exit 1    
 fi
-
 
 # Are we in the right cluster?
 
@@ -71,8 +65,6 @@ if [[ ! "$ENV_TYPE" == "prod"  ]] ; then
 	exit 1
     fi
 fi
-
-
 
 # Based on knowing if we're in dev or prod, alculate the namespace
 # and gcloud project id.
@@ -144,8 +136,6 @@ fi
 
 # Select which cluster region to work on
 
-
-
 if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; then
     echo "Couldn't find cluster $GCLOUD_CLUSTER_NAME when looking for it using the gcloud command"
     exit 1
@@ -160,7 +150,6 @@ if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$KUBERNETES
    exit 1
 fi
 
-
 kubectl config use-context "$KUBERNETES_CLUSTER_NAME"
 echo "baz"
 
@@ -168,7 +157,6 @@ if [[ "$KUBERNETES_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; th
    echo "Could not connect to target cluster $KUBERNETES_CLUSTER_NAME"
    exit 1
 fi
-
 
 ##
 ## At this point we know enough to execute the kubectl command to update secrets.
@@ -211,4 +199,3 @@ else
 fi
    
 echo "Successul deployment."
-

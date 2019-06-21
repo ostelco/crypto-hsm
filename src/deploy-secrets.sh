@@ -117,7 +117,6 @@ fi
 TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE=tls.crt
 cp "${CONCATENATED_ES2PLUS_RETURN_CHANNEL_CERT_AND_KEY_FILE}" "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
-
 ##
 ## Setting up access to the cluster (regional, not zonal)
 ##
@@ -187,7 +186,7 @@ if [[  -z "$(kubectl describe secrets/simmgr-prod-secrets --namespace=${NAMESPAC
     kubectl delete secret simmg-prod-secrets --namespace="${NAMESPACE}"
 fi 
 
-kubectl create secret generic simmgr-prod-secrets \
+kubectl create secret generic simmgr-secrets  \
          --namespace="${NAMESPACE}" \
          --from-literal dbUser=${DB_USER} \
          --from-literal dbPassword=${DB_PASSWORD} \

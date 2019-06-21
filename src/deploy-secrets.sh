@@ -2,13 +2,14 @@
 
 set -e
 
+
 DEPLOYMENT_NAME="$1"
 
 function list_available_deployments {
     echo "Available deployments are:"    >&2
     for x in $(ls ${DEPLOYMENT_SECRETS_HOME} | xargs -n 1 basename | sed 's/.sh//g' | egrep -v '[~#]' ) ; do
-	echo "   $x"
-    done    
+        echo "   $x"
+    done
 }
 
 if [[ "$#" -ne 1 ]] ; then
@@ -38,7 +39,7 @@ fi
 DEPLOYMENT_PARAMETER_FILE="${DEPLOYMENT_SECRETS_HOME}/${DEPLOYMENT_NAME}.sh"
 
 if [[ ! -f "$DEPLOYMENT_PARAMETER_FILE" ]] ; then
-    echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2    
+    echo "Could not find deployment parameter file $DEPLOYMENT_PARAMETER_FILE"    >&2
     list_available_deployments
     exit 1
 fi
@@ -49,20 +50,77 @@ fi
 # Check that we actually got the parameters we need.
 if [[ ! -f "$IDEMIA_ES2_JKS" ]] ; then
    echo "Could not find JKS file $IDEMIA_ES2_JKS"    >&2
-   exit 1    
+   exit 1
 fi
+
+
+if [[ -z "$DB_USER" ]] ; then
+       echo "DB_USER is not set"    >&2
+   exit 1
+fi
+
+
+if [[ -z "$DB_PASSWORD" ]] ; then
+       echo "DB_PASSWORD is not set"    >&2
+   exit 1
+fi
+
+if [[ -z "$DB_URL" ]] ; then
+       echo "DB_URL is not set"    >&2
+   exit 1
+fi
+
+
+if [[ -z "$WG2_USER" ]] ; then
+       echo "WG2_USER is not set"    >&2
+   exit 1
+fi
+
+if [[ -z "$WG2_API_KEY" ]] ; then
+       echo "WG2_API_KEY is not set"    >&2
+   exit 1
+fi
+
+if [[ -z "$WG2_ENDPOINT" ]] ; then
+       echo "WG2_ENDPOINT is not set"    >&2
+   exit 1
+fi
+
+if [[ -z "$ES2_PLUS_ENDPOINT" ]] ; then
+       echo "ES2_PLUS_ENDPOINT is not set"    >&2
+   exit 1
+fi
+
+if [[ -z "$ES9_PLUS_ENDPOINT" ]] ; then
+       echo "ES9_PLUS_ENDPOINT is not set"    >&2
+   exit 1
+fi
+
+
+if [[ -z "$ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER" ]] ; then
+       echo "ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER is not set"    >&2
+   exit 1
+fi
+
+if [[ -z "$IDEMIA_ES2_JKST" ]] ; then
+       echo "IDEMIA_ES2_JKS is not set"    >&2
+   exit 1
+fi
+
+
+
 
 # Are we in the right cluster?
 
 if [[ -z "$ENV_TYPE" ]] ; then
-	echo "ENV_TYPE is not set.  Please set to  'prod' or 'dev'." >&2
-	exit 1    
+        echo "ENV_TYPE is not set.  Please set to  'prod' or 'dev'." >&2
+        exit 1
 fi
 
 if [[ ! "$ENV_TYPE" == "prod"  ]] ; then
     if [[ ! "$ENV_TYPE" == "dev"  ]] ; then
-	echo "ENV_TYPE is set to '$ENV_TYPE', but only 'prod' and 'dev' are legal values." >&2
-	exit 1
+        echo "ENV_TYPE is set to '$ENV_TYPE', but only 'prod' and 'dev' are legal values." >&2
+        exit 1
     fi
 fi
 
@@ -74,9 +132,9 @@ GCLOUD_PROJECT_ID="pi-ostelco-${ENV_TYPE}"
 if [[ -z "$GCLOUD_CLUSTER_NAME" ]] ; then
     echo "GCLOUD_CLUSTER_NAME is not set".
     if [[ -z "$ENV_TYPE" ]] ; then
-	exit 1
+        exit 1
     else
-	GCLOUD_CLUSTER_NAME="pi-${ENV_TYPE}"
+        GCLOUD_CLUSTER_NAME="pi-${ENV_TYPE}"
     fi
 fi
 
@@ -123,7 +181,7 @@ gcloud container clusters \
       --project "${GCLOUD_PROJECT_ID}"
 
 # Then setting which context to us
-gcloud config set project $GCLOUD_PROJECT_ID 
+gcloud config set project $GCLOUD_PROJECT_ID
 kubectl config use-context $(kubectl config get-contexts -o name | grep $GCLOUD_PROJECT_ID)
 
 # Fromo the context, find the kubernetes cluster name
@@ -131,7 +189,7 @@ KUBERNETES_CLUSTER_NAME=$(kubectl config get-contexts -o name | grep $GCLOUD_PRO
 
 if [[ -z "$KUBERNETES_CLUSTER_NAME" ]] ; then
    echo "Could not determine KUBERNETES_CLUSTER_NAME." >&2
-   exit 1    
+   exit 1
 fi
 
 # Select which cluster region to work on
@@ -163,15 +221,16 @@ fi
 ##
 
 # Delete then update the smdp-cacert
-if [[  -z "$(kubectl describe secrets/smdp-cacert --namespace=${NAMESPACE} 2>&1 | grep NotFound)" ]] ; then 
+if [[  -z "$(kubectl describe secrets/smdp-cacert --namespace=${NAMESPACE} 2>&1 | grep NotFound)" ]] ; then
     kubectl delete secret smdp-cacert --namespace="${NAMESPACE}"
-fi 
+fi
+
 kubectl create secret generic smdp-cacert --namespace="${NAMESPACE}" --from-file="${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 
 # Then do the same for sim manager secrets
-if [[  -z "$(kubectl describe secrets/simmgr-secrets --namespace=${NAMESPACE} 2>&1 | grep NotFound)" ]] ; then 
-    kubectl delete secret simmg-secrets --namespace="${NAMESPACE}"
-fi 
+if [[  -z "$(kubectl describe secrets/simmgr-secrets --namespace=${NAMESPACE} 2>&1 | grep NotFound)" ]] ; then
+    kubectl delete secret simmgr-secrets --namespace="${NAMESPACE}"
+fi
 
 kubectl create secret generic simmgr-secrets  \
          --namespace="${NAMESPACE}" \
@@ -182,6 +241,7 @@ kubectl create secret generic simmgr-secrets  \
          --from-literal wg2ApiKey=${WG2_API_KEY} \
          --from-literal wg2Endpoint=${WG2_ENDPOINT} \
          --from-literal es2plusEndpoint=${ES2_PLUS_ENDPOINT} \
+         --from-literal es9plusEndpoint=${ES9_PLUS_ENDPOINT} \
          --from-literal functionRequesterIdentifier=${ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER} \
          --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
 
@@ -196,5 +256,5 @@ if [[ $? -ne 0 ]] ; then
 else
     rm "${TEMPORARY_ES2PLUS_RETURN_CERT_AND_KEY_FILE}"
 fi
-   
+
 echo "Successul deployment."

@@ -102,7 +102,7 @@ if [[ -z "$ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER" ]] ; then
    exit 1
 fi
 
-if [[ -z "$IDEMIA_ES2_JKST" ]] ; then
+if [[ -z "$IDEMIA_ES2_JKS" ]] ; then
        echo "IDEMIA_ES2_JKS is not set"    >&2
    exit 1
 fi

@@ -209,7 +209,6 @@ if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$KUBERNETES
 fi
 
 kubectl config use-context "$KUBERNETES_CLUSTER_NAME"
-echo "baz"
 
 if [[ "$KUBERNETES_CLUSTER_NAME" != "$(kubectl config current-context)"  ]] ; then
    echo "Could not connect to target cluster $KUBERNETES_CLUSTER_NAME"

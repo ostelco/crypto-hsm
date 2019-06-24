@@ -245,6 +245,7 @@ kubectl create secret generic simmgr-secrets  \
          --from-literal functionRequesterIdentifier=${ES2_PLUS_FUNCTION_REQUEST_IDENTIFIER} \
          --from-file idemiaClientCert="${IDEMIA_ES2_JKS}"
 
+
 ##
 ## Reporting status and cleaning up.
 ##

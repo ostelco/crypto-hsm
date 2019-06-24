@@ -122,7 +122,7 @@ case "$CURRENT_STATE" in
                 -srcstoretype PKCS12 \
                 -srcstorepass "$P12_PASSWORD" \
                 -destkeystore "$JKS_RESULT_FILE" \
-                -deststoretype JCEKS \
+                -deststoretype JKS \
                 -deststorepass "$SECRET_KEYSTORE_PASSWORD"
         
         exit 1

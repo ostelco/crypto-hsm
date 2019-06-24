@@ -90,8 +90,6 @@ case "$CURRENT_STATE" in
                     -name "$WORKFLOW_CERT_NAME" \
                     -out "$P12_RESULT_CERT_FILE"
             if [[ $? -eq 1 ]] ; then
-# Delete the keytool invocation? It doesn't make any sense		
-#		keytool -importkeystore -v -srckeystore /home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_prime-prod-may-2019.p12 -srcstoretype PCKS12 '' -deststoretype JCKES
                 (>&2 echo "$0: Error. Could not generate pkcs12 file")
                 exit 1
             fi
@@ -111,11 +109,27 @@ case "$CURRENT_STATE" in
         fi
         if [[ -f "$JKS_RESULT_FILE" ]] ; then
             (>&2 echo "$0: Error. JKS file already exists: '$JKS_RESULT_FILE', not generating new.")
+	    exit 1
         fi
 
 	# Eventually this password should be part of
-	# the set of secrets
+	# the set of secrets, but for now it's just a not so random string.
         SECRET_KEYSTORE_PASSWORD="foobar"
+
+	# Then generate a new java keystore with a dummy certifiate in it, and then remove
+	# that cert leaving an empty keystore.
+	
+	keytool -genkey -keyalg RSA \
+		-dname "cn=Mark Jones, ou=Java, o=Oracle, c=US" \
+		-storepass "$SECRET_KEYSTORE_PASSWORD" \
+		-alias endeca -keystore "$JKS_RESULT_FILE"
+
+	keytool -delete -alias endeca \
+		-storepass "$SECRET_KEYSTORE_PASSWORD" \
+		-keystore "$JKS_RESULT_FILE"
+
+	# Finally insert the content of the .p12 storage into the
+	# java keystore.
         
         keytool -importkeystore -v \
                 -srckeystore "$P12_RESULT_CERT_FILE" \
@@ -126,6 +140,7 @@ case "$CURRENT_STATE" in
                 -deststorepass "$SECRET_KEYSTORE_PASSWORD"
         
         exit 1
+	# Don't believe it!
         stateTransition  "CSR_READY" "DONE"
         ;;
 

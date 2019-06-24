@@ -89,7 +89,9 @@ case "$CURRENT_STATE" in
                     -inkey "$KEYFILE" \
                     -name "$WORKFLOW_CERT_NAME" \
                     -out "$P12_RESULT_CERT_FILE"
-            if [[ $? -eq 1 ]] ; then  keytool -importkeystore -v -srckeystore /home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_prime-prod-may-2019.p12 -srcstoretype PCKS12 '' -deststoretype JCKES
+            if [[ $? -eq 1 ]] ; then
+# Delete the keytool invocation? It doesn't make any sense		
+#		keytool -importkeystore -v -srckeystore /home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_prime-prod-may-2019.p12 -srcstoretype PCKS12 '' -deststoretype JCKES
                 (>&2 echo "$0: Error. Could not generate pkcs12 file")
                 exit 1
             fi
@@ -111,7 +113,9 @@ case "$CURRENT_STATE" in
             (>&2 echo "$0: Error. JKS file already exists: '$JKS_RESULT_FILE', not generating new.")
         fi
 
-        SECRET_KEYSTORE_PASSWORD="supergeheim"
+	# Eventually this password should be part of
+	# the set of secrets
+        SECRET_KEYSTORE_PASSWORD="foobar"
         
         keytool -importkeystore -v \
                 -srckeystore "$P12_RESULT_CERT_FILE" \
@@ -120,7 +124,6 @@ case "$CURRENT_STATE" in
                 -destkeystore "$JKS_RESULT_FILE" \
                 -deststoretype JCEKS \
                 -deststorepass "$SECRET_KEYSTORE_PASSWORD"
-                
         
         exit 1
         stateTransition  "CSR_READY" "DONE"

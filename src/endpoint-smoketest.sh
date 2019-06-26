@@ -1,7 +1,8 @@
 #!/bin/bash
 
 
-ES2PLUS_ENDPOINT="https://mconnect-es2-005.staging.oberthur.net:1034"
+ES2PLUS_ENDPOINT="https://mconnect-es2-005.oberthur.net:1032"
+
 
 DOWNLOAD_ORDER_PATH="/gsma/rsp2/es2plus/downloadOrder"
 DOWNLOAD_ORDER_PAYLOAD="{\"header\":{\"functionRequesterIdentifier\": \"RequesterID\", \"functionCallIdentifier\": \"TX-567\"}, \"eid\":\"0102030405060708090A0B0C0D0E0F\", \"iccid\":\"01234567890123456789\", \"profileType\":\"myProfileType\"}"
@@ -15,7 +16,7 @@ CMD_PAYLOAD=$DOWNLOAD_ORDER_PAYLOAD
 
 
 CACERT_KEY_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
-CACERT_CSR_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.csr
+CACERT_CSR_FILE=/home/rmz/tmp/idemia-prod-ca.crt
 COUNTERSIGNED_CERT_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
 
 
@@ -34,7 +35,6 @@ if [[ ! -f "$COUNTERSIGNED_CERT_FILE" ]] ; then
     echo "No COUNTERSIGNED_CERT_FILE"
     exit 1
 fi
-
 
 curl \
   -vvv \

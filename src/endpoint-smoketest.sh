@@ -19,18 +19,18 @@ CACERT_CSR_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may
 COUNTERSIGNED_CERT_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
 
 
-if [[ -f "$CACERT_KEY_FILE" ]] ; then
+if [[ ! -f "$CACERT_KEY_FILE" ]] ; then
     echo "No CACERT_KEY_FILE"
     exit 1
 fi
 
 
-if [[ -f "$CACERT_CSR_FILE" ]] ; then
+if [[ ! -f "$CACERT_CSR_FILE" ]] ; then
     echo "No CACERT_CSR_FILE"
     exit 1
 fi
 
-if [[ -f "$COUNTERSIGNED_CERT_FILE" ]] ; then
+if [[ ! -f "$COUNTERSIGNED_CERT_FILE" ]] ; then
     echo "No COUNTERSIGNED_CERT_FILE"
     exit 1
 fi

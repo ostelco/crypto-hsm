@@ -18,14 +18,14 @@ ORGANIZATION="Red Otter"
 COMMON_NAME="${nickname}.${WORKFLOW_TYPE}.redotter.co"
 KEYFILE=$(key_filename "redotter" "${WORKFLOW_TYPE}_cert_${nickname}")
 
-P12_RESULT_CERT_FILE=$(p12_filename "redotter" "${WORKFLOW_TYPE}_${nickname}")
-JKS_RESULT_FILE=$(jks_filename "redotter" "${WORKFLOW_TYPE}_${nickname}")
+CA_CERT_FILE=$(crt_filename "$ACTOR" ca)
+P12_RESULT_CERT_FILE=$(p12_filename "$ACTOR" "${WORKFLOW_TYPE}_${nickname}")
+JKS_RESULT_FILE=$(jks_filename "$ACTOR" "${WORKFLOW_TYPE}_${nickname}")
 P12_PASSWORD="secret$WORKFLOW"
-WORKFLOW_CERT_NAME="${WORKFLOW}-redotter-key"
+P12_CERT_NAME="${WORKFLOW}-$ACTOR-key"
 
 INCOMING_CERT_FILES=(${ARTEFACT_ROOT}/idemia/*.pem)
 INCOMING_CERT_FILE=${INCOMING_CERT_FILES[0]}
-
 
 ##
 ##   XXX The typcial workflow should be  that we transition from state to state,
@@ -33,7 +33,6 @@ INCOMING_CERT_FILE=${INCOMING_CERT_FILES[0]}
 ##   exit with an error code (if we couldn't continue to the en)
 ##   or with a success code, of we  are in a declared final state.
 ##
-
 
 CURRENT_STATE="$(currentState)"
 
@@ -52,6 +51,11 @@ case "$CURRENT_STATE" in
 
         if [[  ! -f "$KEYFILE" ]]  ; then
             (>&2 echo "$0: Error. Could not find key file $KEYFILE that was supposed to be generated")
+            exit 1              
+        fi
+
+        if [[  ! -f "$CA_CERT_FILE" ]]  ; then
+            (>&2 echo "$0: Error. Could not find ca certificate file  '$CA_CERT_FILE' that was supposed to be generated")
             exit 1              
         fi
         
@@ -87,7 +91,7 @@ case "$CURRENT_STATE" in
                     -password  "pass:${P12_PASSWORD}" \
                     -in  "$INCOMING_CERT_FILE" \
                     -inkey "$KEYFILE" \
-                    -name "$WORKFLOW_CERT_NAME" \
+                    -name "$P12_CERT_NAME" \
                     -out "$P12_RESULT_CERT_FILE"
             if [[ $? -eq 1 ]] ; then
                 (>&2 echo "$0: Error. Could not generate pkcs12 file")

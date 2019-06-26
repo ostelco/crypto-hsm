@@ -16,7 +16,7 @@ CMD_PAYLOAD=$DOWNLOAD_ORDER_PAYLOAD
 
 CACERT_KEY_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
 CACERT_CSR_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.csr
-COUNTERSIGNED_CERT_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
+COUNTERSIGNED_CERT_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
 
 
 if [[ ! -f "$CACERT_KEY_FILE" ]] ; then

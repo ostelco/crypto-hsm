@@ -2,7 +2,6 @@
 
 set -e
 
-
 DEPLOYMENT_NAME="$1"
 
 function list_available_deployments {
@@ -199,8 +198,6 @@ if [[ -z "$(gcloud container clusters list | grep $GCLOUD_CLUSTER_NAME)" ]] ; th
     exit 1
 fi
 
-# Get credentials so that kubectl can do its job.
-gcloud container clusters get-credentials $GCLOUD_CLUSTER_NAME
 
 # Then check if kubectl can see the expected cluster
 if [[ -z $(kubectl config view -o jsonpath="{.contexts[?(@.name == \"$KUBERNETES_CLUSTER_NAME\")].name}") ]] ; then

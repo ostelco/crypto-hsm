@@ -9,11 +9,23 @@ DOWNLOAD_ORDER_PAYLOAD="{\"header\":{\"functionRequesterIdentifier\": \"Requeste
 CMD_URL="${ES2PLUS_ENDPOINT}${DOWNLOAD_ORDER_PATH}"
 CMD_PAYLOAD=$DOWNLOAD_ORDER_PAYLOAD
 
+#         CACERT_KEY_FILE=/Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/loltel/ck.key
+#        CACERT_CERT_FILE=/Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ca.cert.pem
+# COUNTERSIGNED_CERT_FILE=/Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ck.crt.pem
+
+
+CACERT_KEY_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
+CACERT_CSR_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.csr
+COUNTERSIGNED_CERT_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
+
+
+
+
 curl \
   -vvv \
-  --cacert /Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ca.cert.pem \
-  --key /Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/loltel/ck.key \
-  --cert  /Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ck.crt.pem \
+  --cacert $CACERT_CSR_FILE \
+  --key $CACERT_KEY_FILE \
+  --cert  $COUNTERSIGNED_CERT_FILE \
   --header "X-Admin-Protocol: gsma/rsp/v2.0.0" \
   --header "Content-Type: application/json" \
   --request POST \

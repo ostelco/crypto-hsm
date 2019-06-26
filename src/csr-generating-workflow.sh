@@ -18,7 +18,7 @@ ORGANIZATION="Red Otter"
 COMMON_NAME="${nickname}.${WORKFLOW_TYPE}.redotter.co"
 KEYFILE=$(key_filename "redotter" "${WORKFLOW_TYPE}_cert_${nickname}")
 
-CA_CERT_FILE=$(crt_filename "$ACTOR" ca)
+CA_CERT_FILE=$(crt_filename "idemia" ca)
 P12_RESULT_CERT_FILE=$(p12_filename "$ACTOR" "${WORKFLOW_TYPE}_${nickname}")
 JKS_RESULT_FILE=$(jks_filename "$ACTOR" "${WORKFLOW_TYPE}_${nickname}")
 P12_PASSWORD="secret$WORKFLOW"
@@ -54,11 +54,6 @@ case "$CURRENT_STATE" in
             exit 1              
         fi
 
-        if [[  ! -f "$CA_CERT_FILE" ]]  ; then
-            (>&2 echo "$0: Error. Could not find ca certificate file  '$CA_CERT_FILE' that was supposed to be generated")
-            exit 1              
-        fi
-        
         echo "... done"
 
         stateTransition "INITIAL" "CSR_READY"
@@ -79,9 +74,17 @@ case "$CURRENT_STATE" in
             (>&2 echo "$0: Error. Could not find key file $KEYFILE")
             exit 1              
         fi
-        echo " ... found  keyfile $KEYFILE"     # XXX Should also generate md5 checksum
+        echo " ... found  keyfile $KEYFILE"
 
-        
+
+	echo "Looking for remote ca-cert ..."  
+        if [[  ! -f "$CA_CERT_FILE" ]]  ; then
+            (>&2 echo "$0: Error. Could not find remote ca-cert file $CA_CERT_FILE")
+            exit 1              
+        fi
+        echo " ... found  remote ca-cert file $CA_CERT_FILE"
+
+	        
         if [[ -f "$P12_RESULT_CERT_FILE" ]] ; then
             (>&2 echo "$0: Error. P12 file already exists: '$P12_RESULT_CERT_FILE', not generating new.")
         else
@@ -132,6 +135,14 @@ case "$CURRENT_STATE" in
 		-storepass "$SECRET_KEYSTORE_PASSWORD" \
 		-keystore "$JKS_RESULT_FILE"
 
+
+	# Import the remote root ca into the p12 file
+	keytool -importcert -noprompt \
+		-alias remote-ca \
+		-file "${CA_CERT_FILE}" \
+		-keystore "$P12_RESULT_CERT_FILE" \
+		-storepass "$P12_PASSWORD"
+	
 	# Finally insert the content of the .p12 storage into the
 	# java keystore.
         
@@ -142,6 +153,10 @@ case "$CURRENT_STATE" in
                 -destkeystore "$JKS_RESULT_FILE" \
                 -deststoretype JKS \
                 -deststorepass "$SECRET_KEYSTORE_PASSWORD"
+
+	
+
+	
         
         exit 1
 	# Don't believe it!

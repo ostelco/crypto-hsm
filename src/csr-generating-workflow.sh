@@ -107,7 +107,6 @@ case "$CURRENT_STATE" in
 
         # Generate java keystore file containing the signed
         # certificate
-        # XXXX Perhaps this?populate_keystore "$ACTOR" "ck" "trust" foobar.crt  bartz.crt ..
         # But we'll just convert the P12 certificate into a java .jks certificate
 
 
@@ -124,28 +123,6 @@ case "$CURRENT_STATE" in
 	# the set of secrets, but for now it's just a not so random string.
         SECRET_KEYSTORE_PASSWORD="foobar"
 
-	# Then generate a new java keystore with a dummy certifiate in it, and then remove
-	# that cert leaving an empty keystore.
-	
-	# keytool -genkey -keyalg RSA \
-	# 	-dname "cn=Mark Jones, ou=Java, o=Oracle, c=US" \
-	# 	-storepass "$SECRET_KEYSTORE_PASSWORD" \
-	# 	-alias endeca -keystore "$JKS_RESULT_FILE"
-
-	# keytool -delete -alias endeca \
-	# 	-storepass "$SECRET_KEYSTORE_PASSWORD" \
-	# 	-keystore "$JKS_RESULT_FILE"
-
-
-	# # Import the remote root ca into the p12 file
-	# keytool -importcert -noprompt \
-	# 	-alias remote-ca \
-	# 	-file "${CA_CERT_FILE}" \
-	# 	-keystore "$P12_RESULT_CERT_FILE" \
-	# 	-storepass "$P12_PASSWORD"
-	
-	# Finally insert the content of the .p12 storage into the
-	# java keystore.
 
         keytool -importkeystore -v \
                 -srckeystore "$P12_RESULT_CERT_FILE" \
@@ -164,9 +141,12 @@ case "$CURRENT_STATE" in
 	fi
 
 	
-	# Then recreate the file
+	# Then recreate the file from the prod-cert.crt file
 	rm "$JKS_RESULT_FILE"
 	keytool -importcert -alias impcert -file prod-cert.crt -keystore "$JKS_RESULT_FILE" -deststorepass "$SECRET_KEYSTORE_PASSWORD"
+
+	# Then delete the temporary prod-cert.crt
+	rm prod-cert.crt
 	
         exit 1
 	# Don't believe it!

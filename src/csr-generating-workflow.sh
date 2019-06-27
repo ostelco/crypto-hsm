@@ -94,13 +94,14 @@ case "$CURRENT_STATE" in
                     -password  "pass:${P12_PASSWORD}" \
                     -in  "$INCOMING_CERT_FILE" \
                     -inkey "$KEYFILE" \
-                    -name "$P12_CERT_NAME" \
+                    -name "impcert" \
                     -out "$P12_RESULT_CERT_FILE"
             if [[ $? -eq 1 ]] ; then
                 (>&2 echo "$0: Error. Could not generate pkcs12 file")
                 exit 1
             fi
 
+	    # Then export the now signed certificate into a .cer file
             $MD5 "$P12_RESULT_CERT_FILE" > "${P12_RESULT_CERT_FILE}.md5"
         fi
 
@@ -126,26 +127,26 @@ case "$CURRENT_STATE" in
 	# Then generate a new java keystore with a dummy certifiate in it, and then remove
 	# that cert leaving an empty keystore.
 	
-	keytool -genkey -keyalg RSA \
-		-dname "cn=Mark Jones, ou=Java, o=Oracle, c=US" \
-		-storepass "$SECRET_KEYSTORE_PASSWORD" \
-		-alias endeca -keystore "$JKS_RESULT_FILE"
+	# keytool -genkey -keyalg RSA \
+	# 	-dname "cn=Mark Jones, ou=Java, o=Oracle, c=US" \
+	# 	-storepass "$SECRET_KEYSTORE_PASSWORD" \
+	# 	-alias endeca -keystore "$JKS_RESULT_FILE"
 
-	keytool -delete -alias endeca \
-		-storepass "$SECRET_KEYSTORE_PASSWORD" \
-		-keystore "$JKS_RESULT_FILE"
+	# keytool -delete -alias endeca \
+	# 	-storepass "$SECRET_KEYSTORE_PASSWORD" \
+	# 	-keystore "$JKS_RESULT_FILE"
 
 
-	# Import the remote root ca into the p12 file
-	keytool -importcert -noprompt \
-		-alias remote-ca \
-		-file "${CA_CERT_FILE}" \
-		-keystore "$P12_RESULT_CERT_FILE" \
-		-storepass "$P12_PASSWORD"
+	# # Import the remote root ca into the p12 file
+	# keytool -importcert -noprompt \
+	# 	-alias remote-ca \
+	# 	-file "${CA_CERT_FILE}" \
+	# 	-keystore "$P12_RESULT_CERT_FILE" \
+	# 	-storepass "$P12_PASSWORD"
 	
 	# Finally insert the content of the .p12 storage into the
 	# java keystore.
-        
+
         keytool -importkeystore -v \
                 -srckeystore "$P12_RESULT_CERT_FILE" \
                 -srcstoretype PKCS12 \
@@ -154,10 +155,19 @@ case "$CURRENT_STATE" in
                 -deststoretype JKS \
                 -deststorepass "$SECRET_KEYSTORE_PASSWORD"
 
-	
+	# But wait, we're not done.  We have to apply the "kmm patch" to make this actually work!
+	keytool -export -alias impcert -file prod-cert.crt -keystore "$JKS_RESULT_FILE" -storepass  "$SECRET_KEYSTORE_PASSWORD"
+
+	if [[ ! -f "prod-cert.crt" ]] ; then
+	    echo "Could not find prod-cert.crt"
+	    exit 1
+	fi
 
 	
-        
+	# Then recreate the file
+	rm "$JKS_RESULT_FILE"
+	keytool -importcert -alias impcert -file prod-cert.crt -keystore "$JKS_RESULT_FILE" -deststorepass "$SECRET_KEYSTORE_PASSWORD"
+	
         exit 1
 	# Don't believe it!
         stateTransition  "CSR_READY" "DONE"

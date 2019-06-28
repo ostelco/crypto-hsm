@@ -108,11 +108,9 @@ function stateTransition {
 }
 
 
-
 ##
 ##  Initialization
 ##
-
 
 WORKFLOW_PATH="${WORKFLOWS_PATH}/${WORKFLOW}"
 WORKFLOW_STATE_PATH="${WORKFLOW_PATH}/state.txt"
@@ -401,12 +399,16 @@ function sign_csr {
     if [[ -r "$crt_file" ]] ; then
         echo "Signed certificate file $crt_file already exists, not generating again"
     else
-        echo openssl x509 -req -in $csr_file -CA $ca_crt -CAkey $ca_key -CAcreateserial -out $crt_file
         openssl x509 -req -days $VALIDITY_PERIOD_IN_DAYS -in $csr_file -CA $ca_crt -CAkey $ca_key -CAcreateserial -out $crt_file
         if [[ ! -r "$crt_file" ]] ; then
             (>&2 echo "key-admin-lib:$LINENO: Failed to produce signed certificate in file $crt_file")
             exit 1
         fi
+    fi
+
+    if [[ -r "$crt_file" ]] ; then
+        (>&2 echo "key-admin-lib.sh:$LINENO:  Error. Could not generate certificate file $crt_file")
+        exit 1
     fi
 }
 

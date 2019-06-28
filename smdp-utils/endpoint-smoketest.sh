@@ -12,6 +12,12 @@ CACERT_FILE=$CERT_HOME/idemia/ca.crt
 CERT_FILE=$CERT_HOME/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
 KEY_FILE=$CERT_HOME/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
 
+## Alternative prod parameters
+# CACERT_KEY_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
+# CACERT_CSR_FILE=/home/rmz/tmp/idemia-prod-ca.crt
+# COUNTERSIGNED_CERT_FILE=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
+
+
 
 ## Dev parameters
 # ES2PLUS_ENDPOINT="https://mconnect-es2-005.staging.oberthur.net:1034"

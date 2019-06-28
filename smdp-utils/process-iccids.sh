@@ -8,6 +8,12 @@ let "current = 1"
 
 # Process the ICCIds
 input="iccid-list.txt"
+
+if [[ ! -f "$input" ]] ; then
+    echo "Could not find input iccid file $input"
+    exit 1
+fi 
+
 while IFS= read -r iccid
 do
 

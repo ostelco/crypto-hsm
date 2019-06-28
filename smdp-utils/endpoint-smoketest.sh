@@ -9,10 +9,14 @@ DOWNLOAD_ORDER_PAYLOAD="{\"header\":{\"functionRequesterIdentifier\": \"Requeste
 CMD_URL="${ES2PLUS_ENDPOINT}${DOWNLOAD_ORDER_PATH}"
 CMD_PAYLOAD=$DOWNLOAD_ORDER_PAYLOAD
 
+CACERT_FILE=/Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ca.cert.pem
+KEY_FILE=/Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/loltel/ck.key
+CERT_FILE=/Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ck.crt.pem
+
 curl \
   -vvv \
-  --cacert /Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ca.cert.pem \
-  --key /Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/loltel/ck.key \
+  --cacert $CACERT_FILE \
+  --key $KEY_FILE \
   --cert  /Users/rmz/git/loltel-esim/loltel-es2-idemia-secrets/crypto-artefacts/idemia/ck.crt.pem \
   --header "X-Admin-Protocol: gsma/rsp/v2.0.0" \
   --header "Content-Type: application/json" \

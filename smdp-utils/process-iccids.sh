@@ -3,7 +3,7 @@
 # First and last of the ICCID file that will be processed. 
 # Program is idempotent with respect to output.  Will output CSV file with iccid, confirmation code
 first=1
-last=3
+last=100
 
 let "current = 1"
 
@@ -16,7 +16,7 @@ if [[ ! -f "$input" ]] ; then
 fi 
 
 
-echo "ICCID, CONFIRMATION_CODE"
+echo " ICCID                CONFIRMATION_CODE"
 
 while IFS= read -r iccid
 do

@@ -72,6 +72,7 @@ ES2PLUS_ENDPOINT="https://mconnect-es2-005.oberthur.net:1032"
 CACERT_FILE=$CERT_HOME/idemia/ca.crt
 CERT_FILE=$CERT_HOME/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
 KEY_FILE=$CERT_HOME/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
+FUNCTION_REQUESTER_IDENTIFIER="1.3.6.1.4.1.12748.2.1"
 
 if [[ ! -f "$CACERT_FILE" ]] ; then
     echo "Could not find cacert file '$CACERT_FILE'"
@@ -93,13 +94,6 @@ fi
 
 
 
-if  [[ ! -f "$SCRIPT_SECRETS_FILE"  ]] ; then
-    echo "$SCRIPTNAME ERROR: No SCRIPT_SECRETS_FILE file found (tried looking in '$SCRIPT_SECRETS_FILE')"
-    exit 1
-else
-    source $SCRIPT_SECRETS_FILE
-fi
-
 
 ##
 ## Then check that we have all the parameters/secrets we need
@@ -114,23 +108,6 @@ if  [[ -z "$FUNCTION_REQUESTER_IDENTIFIER"  ]] ; then
     echo "$SCRIPTNAME ERROR: No FUNCTION_REQUESTER_IDENTIFIER variable set"
     exit 1
 fi
-
-if  [[ -z "$CRYPTO_ARTEFACTS_HOME"  ]] ; then
-    echo "$SCRIPTNAME ERROR: No CRYPTO_ARTEFACTS_HOME variable set"
-    exit 1
-fi
-
-if  [[ -z "$WG2_PROD_URL"  ]] ; then
-    echo "$SCRIPTNAME ERROR: No WG2_PROD_URL variable set"
-    exit 1
-fi
-
-
-if  [[ -z "$LOLTEL_PROD_KEY"  ]] ; then
-    echo "$SCRIPTNAME ERROR: No LOLTEL_PROD_KEY variable set"
-    exit 1
-fi
-
 
 
 ##
@@ -619,7 +596,8 @@ for CMD in $COMMANDS ; do
     elif [[  "$CMD" = "es2confirm"  ]] ; then
         es2plus_invoke "$CONFIRM_CMD_URL" "$CONFIRM_CMD_PAYLOAD"
     elif [[  "$CMD" = "hlrProvision" ]] ; then
-        provisionMsisdn "$MSISDN" "$ICCID"
+	echo "hlrProvision not implemented for production"
+	exit 1
     else
         echo "$SCRIPTNAME ERROR: Unknown command '$CMD'. Legal commands are es2recover, es2download, es2confirm, es2ProfileStatus and hlrovision. "
         exit 1

@@ -67,6 +67,32 @@ fi
 
 
 SCRIPT_SECRETS_FILE=~/.esim_secrets/secret_variables.sh
+
+ES2PLUS_ENDPOINT="https://mconnect-es2-005.oberthur.net:1032"
+CACERT_FILE=$CERT_HOME/idemia/ca.crt
+CERT_FILE=$CERT_HOME/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
+KEY_FILE=$CERT_HOME/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
+
+if [[ ! -f "$CACERT_FILE" ]] ; then
+    echo "Could not find cacert file '$CACERT_FILE'"
+    exit 1
+fi
+
+
+if [[ ! -f "$KEY_FILE" ]] ; then
+    echo "Could not find key file '$KEY_FILE'"
+    exit 1
+fi
+
+
+if [[ ! -f "$CERT_FILE" ]] ; then
+    echo "Could not find cert file '$CERT_FILE'"
+    exit 1
+fi
+
+
+
+
 if  [[ ! -f "$SCRIPT_SECRETS_FILE"  ]] ; then
     echo "$SCRIPTNAME ERROR: No SCRIPT_SECRETS_FILE file found (tried looking in '$SCRIPT_SECRETS_FILE')"
     exit 1
@@ -342,9 +368,9 @@ function es2plus_invoke {
     local payload=$2
     local result=$(curl \
         --silent \
-        --cacert "${CRYPTO_ARTEFACTS_HOME}/idemia/ca.cert.pem" \
-        --key "${CRYPTO_ARTEFACTS_HOME}/loltel/ck.key" \
-        --cert  "${CRYPTO_ARTEFACTS_HOME}/idemia/ck.crt.pem" \
+        --cacert "$CACERT_FILE" \
+        --key "$KEY_FILE" \
+        --cert  "$CERT_FILE" \
         --header "X-Admin-Protocol: gsma/rsp/v2.0.0" \
         --header "Content-Type: application/json" \
         --request POST \

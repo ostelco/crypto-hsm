@@ -68,6 +68,7 @@ fi
 
 SCRIPT_SECRETS_FILE=~/.esim_secrets/secret_variables.sh
 
+CERT_HOME=/Users/rmz/my-certs/prime-prod-may-2019/crypto-artefacts
 ES2PLUS_ENDPOINT="https://mconnect-es2-005.oberthur.net:1032"
 CACERT_FILE=$CERT_HOME/idemia/ca.crt
 CERT_FILE=$CERT_HOME/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem

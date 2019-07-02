@@ -16,5 +16,5 @@ grep -v ICCID "$input" | while IFS= read -r iccidMatchingIdLine
 do
   iccid=$(echo $iccidMatchingIdLine | awk '{print $1}')
   matchingid=$(echo $iccidMatchingIdLine | awk 'BEGIN{RS="\r\n"}{print $2}')
-  echo "UPDATE sim_entries SET matchingid = '$matchingid', smdpplusstate = 'RELEASED', provisionstate = 'AVAILABLE' WHERE iccid = '$iccid' and smdpplusstate = 'AVAILABLE';"
+  echo "UPDATE sim_entries SET matchingid = '$matchingid', smdpplusstate = 'RELEASED' WHERE iccid = '$iccid' AND smdpplusstate = 'AVAILABLE'  AND provisionstate = 'AVAILABLE';"
 done

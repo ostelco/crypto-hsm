@@ -5,7 +5,7 @@
 # the sm-dp+
 
 # Process the ICCIds
-input="iccid-confirmation-codes.csv"
+input="combined-result.csv"
 
 if [[ ! -f "$input" ]] ; then
     echo "Could not find input iccid/activartion code file $input"

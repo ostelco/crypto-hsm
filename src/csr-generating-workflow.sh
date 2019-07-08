@@ -27,17 +27,48 @@ P12_CERT_NAME="${WORKFLOW}-$ACTOR-key"
 INCOMING_CERT_FILES=(${ARTEFACT_ROOT}/idemia/*.pem)
 INCOMING_CERT_FILE=${INCOMING_CERT_FILES[0]}
 
-##
-##   XXX The typcial workflow should be  that we transition from state to state,
-##   and at some point we are not able to transition any further, at that point we either
-##   exit with an error code (if we couldn't continue to the en)
-##   or with a success code, of we  are in a declared final state.
-##
+
+## Introduction
+# This script will traverse a state machine in the sequence
+#
+# INITIAL->CSR_READY->DONE
+#
+# The script uses the library "key-admin-lib.sh" to do 
+# low level manipulations, but the state transitions and the
+# actual tasks are performed in the case statement below.
+#
+# The script is invoked using three parameters, two of which are
+# given as environment variables, the third as a single command
+# line parameter.
+#
+# The environment variables are:
+#
+#    WORKFLOWS_TYPE: A token consisting of letters, numbers dash (-) and
+#                    lowercase characters used to name the type of
+#                    workflow.  e.g. "web-access-csr". This variable
+#                    is typically set in a wrapper script such as
+#                    csr-for-web-access-workflow.sh
+#
+#    WORKFLOWS_PATH: Path to a location in the filesystem where the
+#                    state, including secrets, involved in the workflow
+#                    will be stored.  This variable is typically set
+#                    in a .profile or similar, and is assumed to be
+#                    available whenever scripts based on
+#                    csr-generating-workflow.sh is run
+#
+# The single command line parameter is the name of the workflow. 
+# It will be concatenated to the WORKFLOW_PATH to generate e
+# file hiearchy holding the state for the workflow, including its
+# secrets.
+
 
 CURRENT_STATE="$(currentState)"
 
 case "$CURRENT_STATE" in
 
+    # Will generate a certificate signing request (CSR), and associated
+    # key file.  This CSR file should be extracted from the workflow
+    # directory and sent to the party that should countersign it.
     INITIAL)
         echo "In initial state, will generate certificate and CSR"
 
@@ -59,6 +90,29 @@ case "$CURRENT_STATE" in
         stateTransition "INITIAL" "CSR_READY"
         ;;
 
+    # In this state we're waiting for an incoming, countersigned
+    # certificate.  When discovered, then we'll combine it with the
+    # keyfile and generate a PKCS12 keystore file.  This .p12 file can
+    # then be used by whoever needs the certificate.  It may be useful
+    # to get a copy of the signing certificate used to countersign
+    # (the "remote ca-cert" file), so that it can be put in the list
+    # of # trusted certificates.  However, this requirement can be
+    # bypassed by declaring the certificate in .p12 as trusted.
+    #
+    # The .p12 certificate will be "protected" by a password
+    # (because, it has to, and the feature can't as far as I know
+    # be switched off).  That password is generated automatically, and
+    # will be "secret$workflow" where "$workflow" is the name of the 
+    # workflow associated with the signing process.
+    #
+    # A jks (java keystore) file will also be generated, but that is
+    # not a result to be trusted.  It currently doesn't seem to work
+    # in the sense that when a java program tries to use it for crypto,
+    # it will crash rather than work.   The password for the
+    # jks is set to the string "foobar".
+    #
+    # From the above it should be understood that not much trust is
+    # put into the practice of protecting keystores with passwords.
     CSR_READY)
         echo "Looking for incoming certificate ..."
 
@@ -83,7 +137,6 @@ case "$CURRENT_STATE" in
             exit 1              
         fi
         echo " ... found  remote ca-cert file $CA_CERT_FILE"
-
 	        
         if [[ -f "$P12_RESULT_CERT_FILE" ]] ; then
             (>&2 echo "$0: Error. P12 file already exists: '$P12_RESULT_CERT_FILE', not generating new.")

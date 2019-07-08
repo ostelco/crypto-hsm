@@ -26,8 +26,6 @@ code is being kept in a _closed_ repository since it may contain
 sensitive information, like phone numbers.  The code should not be
 open sourced until all information  in it is confirmed to be non-sensitive.
 
-
-
 smdp-utils
 ==
 
@@ -36,7 +34,6 @@ in order to add sim profiles into sm-dp+, the sim database of prime,
 and HSS.  They are all intended to substitute for functions that
 should by design be parts of Prime, but at the time of writing were
 not used.
-
 
 endpoint-smoketest.sh
 --

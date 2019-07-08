@@ -14,7 +14,7 @@ code is doing.   We'll do that by describing file by file:
 
 
 README.md
--- 
+--
 
 this file
 
@@ -44,7 +44,7 @@ A simple script that will test talking to an sm-dp+ using the ES2+ protocol.
 extract-non-golden-msisdns.awk
 --
 
-Takes a sequence of triples of iccid, imsi, msisdn, and will only 
+Takes a sequence of triples of iccid, imsi, msisdn, and will only
 let through triples where the msisdn is _not_ ending with four
 zeros or four nines.   Numbers matching these patterns are called
 "golden" and should in general not be used by our service.
@@ -52,7 +52,7 @@ zeros or four nines.   Numbers matching these patterns are called
 
 generate-import-scripts.sh
 --
-A wrapper code that will invoke a go language script to generate 
+A wrapper code that will invoke a go language script to generate
 shell scripts that will import imsi/iccid/msisdn tripes into the
 prime subsystem.    This code was written as a helper to
 systematically generate import scripts from the data found in the
@@ -95,7 +95,7 @@ update-profile.sh
 
 A copy of the update-profile.sh script that was originally developed,
 in a different repository, i order to test out assumptions about ES2+
-and the connections to SM-DP+ using two-way TLS.  
+and the connections to SM-DP+ using two-way TLS.
 
 It has since been used as  kind of swiss army knife for doing things
 with sim profiles both with sm-dp+ and with HSS activation.
@@ -144,6 +144,73 @@ countersigned crypographic X.509 certificates used for TLS (Transport
 Lever Security) authentication
 
 
+This script will traverse a state machine in the sequence
+
+     INITIAL->CSR_READY->DONE
+
+The script uses the library "key-admin-lib.sh" to do
+low level manipulations, but the state transitions and the
+actual tasks are performed in the case statement below.
+
+The script is invoked using three parameters, two of which are
+given as environment variables, the third as a single command
+line parameter.
+
+The environment variables are:
+
+   WORKFLOWS_TYPE: A token consisting of letters, numbers dash (-) and
+                   lowercase characters used to name the type of
+                   workflow.  e.g. "web-access-csr". This variable
+                   is typically set in a wrapper script such as
+                   csr-for-web-access-workflow.sh
+
+   WORKFLOWS_PATH: Path to a location in the filesystem where the
+                   state, including secrets, involved in the workflow
+                   will be stored.  This variable is typically set
+                   in a .profile or similar, and is assumed to be
+                   available whenever scripts based on
+                   csr-generating-workflow.sh is run
+
+The single command line parameter is the name of the workflow.
+It will be concatenated to the WORKFLOW_PATH to generate e
+file hiearchy holding the state for the workflow, including its
+secrets.
+
+In the initial stat the script will generate a certificate signing
+request (CSR), and associated key file.  This CSR file should be
+extracted from the workflow directory and sent to the party that
+should countersign it.
+
+In this state we're waiting for an incoming, countersigned
+certificate.  When discovered, then we'll combine it with the
+keyfile and generate a PKCS12 keystore file.  This .p12 file can
+then be used by whoever needs the certificate.  It may be useful
+to get a copy of the signing certificate used to countersign
+(the "remote ca-cert" file), so that it can be put in the list
+of # trusted certificates.  However, this requirement can be
+bypassed by declaring the certificate in .p12 as trusted.
+
+The .p12 certificate will be "protected" by a password
+(because, it has to, and the feature can't as far as I know
+be switched off).  That password is generated automatically, and
+will be "secret$workflow" where "$workflow" is the name of the
+workflow associated with the signing process.
+
+A jks (java keystore) file will also be generated, but that is
+not a result to be trusted.  It currently doesn't seem to work
+in the sense that when a java program tries to use it for crypto,
+it will crash rather than work.   The password for the
+jks is set to the string "foobar".
+
+From the above it should be understood that not much trust is
+put into the practice of protecting keystores with passwords.
+
+Currently this script will _NOT_ progress to a "DONE" state, but will
+indefinitely be  in a  CSR_READY state.  This is for debugging
+purposes, but also shouldn't be much of a concern as applying the
+operations in the CSR_READY state shouls be idempotent, generating the
+exacte same output every time it is invoked.
+
 deploy-secrets.sh
 --
 Deploy secrets into a kubernetes cluster intended for running Prime.
@@ -162,14 +229,25 @@ The workflow-name is the name that will be associated with both the
 certificates being generated and the workflow used to generate it.
 
 
+Some more details:
+
+Since we are waiting for a  CSR coming from Idemia, we will
+immediately transition to the "WAITING_FOR_CSR" state
+Looking for a CSR coming in from idemia.  If we get
+to that state (meaning we see an incoming .csr.pem file),
+we will countersign it and send it back to its origin.
+ We will also make a file called the "CERTIFICATE_CHAIN_DOC" that
+contains both the signed CSR and the signing CRT that was used
+to countersign.  This file should then be used by
+the reverse proxy (envoy or other) that terminates the incoming
+SSL connection.  Finally some information is printed about the
+certificate, and the state machine is put into state DONE
+meaning that further invocations will have no effect.
+
+
 
 key-admin-lib.sh
 --
 
 A shell script library intended to manipulate cryptograhic
 certificates, signing requests, keys, and associated objects.
-
-
-
-
-

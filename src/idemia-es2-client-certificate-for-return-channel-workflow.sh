@@ -33,13 +33,31 @@ P12_RESULT_CERT_FILE=$(p12_filename "redotter" "browser_client_cert_$nickname")
 ROLE="${WORKFLOW}_csr_countersigning_ca"
 
 
+# This function will be run repeatedly until 
+# no progress can be made upon which the script will
+# terminate.
+
 function runStateMachine() {
     case "$CURRENT_STATE" in
 
+
+	# Since we are waiting for a  CSR coming from Idemia, we will
+	# immediately transition to the "WAITING_FOR_CSR" state
 	INITIAL)
 	    stateTransition "INITIAL" "WAITING_FOR_CSR"
 	    ;;
 
+	# Looking for a CSR coming in from idemia.  If we get
+	# to that state (meaning we see an incoming .csr.pem file),
+	# we will countersign it and send it back to its origin.
+	#
+	# We will also make a file called the "CERTIFICATE_CHAIN_DOC" that 
+	# contains both the signed CSR and the signing CRT that was used
+	# to countersign.  This file should then be used by
+	# the reverse proxy (envoy or other) that terminates the incoming
+	# SSL connection.  Finally some information is printed about the
+	# certificate, and the state machine is put into state DONE
+	# meaning that further invocations will have no effect.
 	WAITING_FOR_CSR)
 	    if [[ -z "$ACTOR" ]] ; then
 		(>&2 echo "$0:$LINENO Error.  ACTOR is null")

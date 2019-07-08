@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##
-## Key length. 
+## Key length.
 ##
 KEY_LENGTH=4096
 
@@ -20,7 +20,7 @@ if  [[ -z "$WORKFLOW_TYPE"  ]]; then
 fi
 
 
-if [[ -z "$WORKFLOWS_PATH" ]] ; then 
+if [[ -z "$WORKFLOWS_PATH" ]] ; then
     if  [[ ! -z "$WORKFLOWS_HOME"  ]]  &&   [[ ! -z "$WORKFLOW_TYPE"  ]] ; then
         WORKFLOWS_PATH="$WORKFLOWS_HOME/$WORKFLOW_TYPE"
         if [[ ! -d "$WORKFLOWS_PATH" ]] ; then
@@ -48,7 +48,7 @@ if [[ ! -z $(echo "$UNAME_VALUE" | grep "Ubuntu" ) ]] ; then
 else
     MD5=md5
 fi
-    
+
 
 DEPENDENCIES="keytool openssl gpg tar $MD5"
 
@@ -91,7 +91,7 @@ function currentState {
 
 function setState {
     local nextState=$1
-    echo "$nextState" > "$WORKFLOW_STATE_PATH"    
+    echo "$nextState" > "$WORKFLOW_STATE_PATH"
 }
 
 function stateTransition {
@@ -114,7 +114,7 @@ function stateTransition {
 
 WORKFLOW_PATH="${WORKFLOWS_PATH}/${WORKFLOW}"
 WORKFLOW_STATE_PATH="${WORKFLOW_PATH}/state.txt"
-ARTEFACT_ROOT="${WORKFLOW_PATH}/crypto-artefacts" 
+ARTEFACT_ROOT="${WORKFLOW_PATH}/crypto-artefacts"
 
 GPG_RECIPIENT_FILENAME="${WORKFLOW_PATH}/gpg-email-address.txt"
 
@@ -126,7 +126,7 @@ fi
 
 if [[ ! -f "$WORKFLOW_STATE_PATH" ]] ; then
     echo "INFO $0: For some reason the state was unknown, resetting to INITIAL"
-    setState "INITIAL"    
+    setState "INITIAL"
 fi
 
 

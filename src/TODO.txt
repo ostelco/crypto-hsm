@@ -1,12 +1,5 @@
-1.  Run through the processes of generating CSRs and making them flow through the system
-    (keeping the artefacts in a compeltely separate code hierarchy).
-     - CSR-for-web ...
-     - CSR for prime ...
-     - Ideemia-es2-client ...
 
-2.  Move the whole thing to the "HSM"
-
-3.  Think about how to use a pkcs #11 compliant HSM instead of local storage, and if possible
+*  Think about how to use a pkcs #11 compliant HSM instead of local storage, and if possible
      Reading:
 
         o https://github.com/miekg/pkcs11 - golang implementation
@@ -15,9 +8,8 @@
 	o Docs https://www.oasis-open.org/standards#pkcs11-base-v2.40
         o Google HSM https://cloud.google.com/kms/docs/hsm
 
-4.  Think about porting the whole thing to golang and rapsberry pi, or something equally insular.
+*  Think about porting the whole thing to golang and rapsberry pi, or something equally insular.
 
-5.  Think about running the pkcs#11 HSM in a public cloud of some
-soet.
+*  Think about running the pkcs#11 HSM in a public cloud of some soet.
 
 

@@ -4,11 +4,23 @@
 
 ### FQDN and crypto-key parameters for prod and dev.  Use only one of them.
 
+
 ## Prod parameters
-CERT_HOME=/Users/rmz/my-certs/prime-prod-may-2019/crypto-artefacts
+# CERT_HOME=${CERT_HOME:-/Users/rmz/my-certs/prime-prod-may-2019/crypto-artefacts}
+
+
+CERT_HOME=/home/rmz/git/secrets/workflows/es2plus-prime-csr/prime-prod-may-2019/crypto-artefacts
+
+if [[ ! -d "$CERT_HOME" ]] ; then
+   
+ echo "Could not find directory  'CERT_HOME=$CERT_HOME'"
+    exit 1
+fi
 
 ES2PLUS_ENDPOINT="https://mconnect-es2-005.oberthur.net:1032"
 CACERT_FILE=$CERT_HOME/idemia/ca.crt
+
+
 CERT_FILE=$CERT_HOME/idemia/com.idemia.otcloud.asia.production.RedOtter.es2plus.client.cert.pem
 KEY_FILE=$CERT_HOME/redotter/es2plus-prime-csr_cert_prime-prod-may-2019.key
 
